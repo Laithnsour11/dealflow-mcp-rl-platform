@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "name": "ghl-mcp-rl-platform",
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/**/*": {
+      "maxDuration": 30
+    },
+    "src/app/api/rl/**/*": {
+      "maxDuration": 60
+    },
+    "src/app/api/mcp/**/*": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install"
+}
