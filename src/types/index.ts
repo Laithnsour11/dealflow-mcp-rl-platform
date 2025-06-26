@@ -259,11 +259,19 @@ export interface PaginatedResponse<T> extends APIResponse<T[]> {
 }
 
 // Error types
-export interface APIError extends Error {
+export class APIError extends Error {
   statusCode: number
   code: string
   tenantId?: string
   context?: Record<string, any>
+
+  constructor(message: string, statusCode: number = 500, code: string = 'INTERNAL_ERROR', context?: Record<string, any>) {
+    super(message)
+    this.name = 'APIError'
+    this.statusCode = statusCode
+    this.code = code
+    this.context = context
+  }
 }
 
 // Dashboard types
