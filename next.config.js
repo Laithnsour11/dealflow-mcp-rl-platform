@@ -4,6 +4,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ['pg']
   },
   
+  
   // Vercel deployment optimizations
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
