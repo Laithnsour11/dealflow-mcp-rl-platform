@@ -142,7 +142,7 @@ async function handleMCPRequest(
     }
 
     // Parse request body for POST requests
-    let requestData = {}
+    let requestData: Record<string, any> = {}
     if (method === 'POST') {
       try {
         requestData = await request.json()
