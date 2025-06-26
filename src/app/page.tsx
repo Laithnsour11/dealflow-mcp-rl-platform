@@ -2,6 +2,7 @@
  * Main Platform Landing Page
  * Shows platform status, API endpoints, and testing interface
  */
+'use client'
 
 export default function HomePage() {
   return (

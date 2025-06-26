@@ -18,7 +18,7 @@ export class NeonMCPClient {
 
   constructor(config: NeonMCPConfig = {}) {
     this.config = config
-    this.mcpServerUrl = config.mcpServerUrl || process.env.NEON_MCP_SERVER_URL || 'http://localhost:8000'
+    this.mcpServerUrl = config.mcpServerUrl || 'http://localhost:8000'
   }
 
   /**
