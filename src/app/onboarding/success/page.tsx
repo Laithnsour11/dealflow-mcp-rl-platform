@@ -12,6 +12,7 @@ function OnboardingSuccessContent() {
   const [testResults, setTestResults] = useState<any[]>([])
 
   const installationId = searchParams.get('installation')
+  const apiKey = searchParams.get('apiKey')
 
   useEffect(() => {
     if (installationId) {
