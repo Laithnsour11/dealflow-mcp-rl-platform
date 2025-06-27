@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const oauth = new GHLOAuth({
       clientId: process.env.GHL_OAUTH_CLIENT_ID!,
       clientSecret: process.env.GHL_OAUTH_CLIENT_SECRET!,
-      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/ghl/callback`,
+      redirectUri: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://ghl-mcp-rl-platform.vercel.app').trim()}/api/auth/ghl/callback`,
       scopes: GHLOAuth.getAllRequiredScopes(),
     });
 
@@ -56,7 +56,4 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Failed to start OAuth flow:', error);
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=oauth_start_failed&description=${encodeURIComponent(error.message)}`
-    );
-  }
-}
+      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=oauth_start_failed&descripti

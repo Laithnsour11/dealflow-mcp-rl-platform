@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const oauth = new GHLOAuth({
       clientId: process.env.GHL_OAUTH_CLIENT_ID!,
       clientSecret: process.env.GHL_OAUTH_CLIENT_SECRET!,
-      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/ghl/callback`,
+      redirectUri: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://ghl-mcp-rl-platform.vercel.app').trim()}/api/auth/ghl/callback`,
       scopes: GHLOAuth.getAllRequiredScopes(),
     });
 
@@ -178,7 +178,4 @@ async function updateTenantAuthMethod(tenantId: string, method: string, installa
 
     return await response.json();
   } catch (error) {
-    console.error('Failed to update tenant auth method:', error);
-    throw error;
-  }
-}
+    console.error('Failed to update

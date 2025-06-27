@@ -25,6 +25,7 @@ interface OAuthTokens {
 export class GHLOAuth {
   private config: OAuthConfig;
   private baseUrl = 'https://services.leadconnectorhq.com';
+  private marketplaceUrl = 'https://marketplace.leadconnectorhq.com';
 
   constructor(config: OAuthConfig) {
     this.config = config;
@@ -43,7 +44,7 @@ export class GHLOAuth {
       userType,
     });
 
-    return `${this.baseUrl}/oauth/authorize?${params.toString()}`;
+    return `${this.marketplaceUrl}/oauth/chooselocation?${params.toString()}`;
   }
 
   /**
