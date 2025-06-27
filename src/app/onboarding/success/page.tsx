@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function OnboardingSuccessPage() {
+function OnboardingSuccessContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [installation, setInstallation] = useState<any>(null)
@@ -236,5 +236,24 @@ export default function OnboardingSuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading installation details...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function OnboardingSuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OnboardingSuccessContent />
+    </Suspense>
   )
 }

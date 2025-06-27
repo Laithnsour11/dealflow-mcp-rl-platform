@@ -9,6 +9,9 @@ import { cookies } from 'next/headers';
 import { oauthStateStore } from '@/lib/ghl/marketplace/oauth-state-store';
 import * as crypto from 'crypto';
 
+// Force dynamic rendering for OAuth callback
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

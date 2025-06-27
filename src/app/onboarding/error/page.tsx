@@ -2,8 +2,9 @@
 
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function OnboardingErrorPage() {
+function OnboardingErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
   const description = searchParams.get('description')
@@ -136,5 +137,24 @@ export default function OnboardingErrorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading error details...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function OnboardingErrorPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OnboardingErrorContent />
+    </Suspense>
   )
 }
