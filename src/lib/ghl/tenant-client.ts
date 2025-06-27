@@ -1,4 +1,8 @@
 import { Tenant } from '@/types';
+import { TenantGHLClientV2 } from './tenant-client-v2';
+
+// Re-export the V2 client with all 269 tools
+export { TenantGHLClientV2 } from './tenant-client-v2';
 
 interface GHLClientConfig {
   apiKey: string;
@@ -6,6 +10,7 @@ interface GHLClientConfig {
   baseUrl?: string;
 }
 
+// Legacy client for backward compatibility
 class TenantGHLClient {
   private apiKey: string;
   private locationId: string;
