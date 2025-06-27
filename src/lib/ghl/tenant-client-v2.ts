@@ -579,4 +579,48 @@ export class TenantGHLClientV2 {
   deleteUser: any;
   getUserByEmail: any;
   getUserPermissions: any;
-  updateUserPermissions
+  updateUserPermissions: any;
+  getUserRoles: any;
+  assignUserRole: any;
+  removeUserRole: any;
+  getTeams: any;
+  createTeam: any;
+  updateTeam: any;
+  deleteTeam: any;
+
+  // Custom Object Tools (9 tools)
+  getAllObjects: any;
+  createObjectSchema: any;
+  getObjectSchema: any;
+  updateObjectSchema: any;
+  createObjectRecord: any;
+  getObjectRecord: any;
+  updateObjectRecord: any;
+  deleteObjectRecord: any;
+  searchObjectRecords: any;
+
+  // TODO: Add remaining tool implementations...
+  // This is a subset showing the pattern. The full implementation would include all 269 tools.
+
+  // ============================================
+  // Special RL Integration endpoints (2 tools)
+  // ============================================
+  async getConversationTranscripts(contactId: string, params?: any) {
+    const queryString = params ? `&${new URLSearchParams(params)}` : '';
+    return this.makeRequest(`/rl/conversation-transcripts?contactId=${contactId}${queryString}`);
+  }
+
+  async getContactJourney(contactId: string, params?: any) {
+    const queryString = params ? `&${new URLSearchParams(params)}` : '';
+    return this.makeRequest(`/rl/contact-journey?contactId=${contactId}${queryString}`);
+  }
+}
+
+// Factory function for backward compatibility
+export function createTenantGHLClient(tenant: Tenant, decryptedApiKey: string): TenantGHLClientV2 {
+  return new TenantGHLClientV2({
+    apiKey: decryptedApiKey,
+    locationId: tenant.ghl_location_id,
+    baseUrl: process.env.GHL_BASE_URL
+  });
+}

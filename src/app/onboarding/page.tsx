@@ -11,15 +11,8 @@ export default function OnboardingPage() {
   const startOAuthFlow = async () => {
     setLoading(true)
     try {
-      // Get tenant API key from localStorage or session
-      const apiKey = localStorage.getItem('tenant_api_key')
-      if (!apiKey) {
-        router.push('/api/tenant/register')
-        return
-      }
-
-      // Start OAuth flow
-      window.location.href = `/api/auth/ghl/authorize?userType=Location`
+      // Use the simplified OAuth start endpoint that doesn't require subdomain
+      window.location.href = `/api/auth/ghl/start?userType=Location`;
     } catch (error) {
       console.error('Failed to start OAuth flow:', error)
       setLoading(false)

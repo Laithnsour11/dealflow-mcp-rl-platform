@@ -120,6 +120,24 @@ function OnboardingSuccessContent() {
           </div>
         )}
 
+        {/* API Key Display */}
+        {apiKey && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Your API Key
+            </h2>
+            <div className="bg-white rounded border border-yellow-300 p-4">
+              <code className="block text-sm font-mono text-gray-800 break-all">
+                {apiKey}
+              </code>
+            </div>
+            <p className="mt-3 text-sm text-yellow-800">
+              <strong>Important:</strong> Save this API key securely. It won't be shown again. 
+              Use this key in the X-Tenant-API-Key header for all API requests.
+            </p>
+          </div>
+        )}
+
         {/* Connection Test */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex items-center justify-between mb-4">

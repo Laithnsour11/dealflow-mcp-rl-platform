@@ -37,10 +37,10 @@ export async function GET(request: NextRequest) {
     // Verify state from cookie
     const cookieStore = cookies();
     const storedState = cookieStore.get('ghl_oauth_state')?.value;
-    const tenantId = cookieStore.get('ghl_oauth_tenant')?.value;
+    const provisionalTenantId = cookieStore.get('provisional_tenant_id')?.value;
 
     let isValidState = false;
-    let resolvedTenantId = tenantId;
+    let resolvedTenantId = provisionalTenantId;
 
     // Check cookie state first
     if (storedState && GHLOAuth.verifyState(state, storedState)) {
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (!isValidState || !resolvedTenantId) {
+    if (!isValidState) {
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=invalid_state`
       );
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Clear OAuth cookies
     cookieStore.delete('ghl_oauth_state');
-    cookieStore.delete('ghl_oauth_tenant');
+    cookieStore.delete('provisional_tenant_id');
 
     // Initialize OAuth
     const oauth = new GHLOAuth({
@@ -98,12 +98,16 @@ export async function GET(request: NextRequest) {
     await storeOAuthInstallation(installation);
 
     // Update tenant to use OAuth authentication
-    await updateTenantAuthMethod(resolvedTenantId, 'oauth', installation.id);
+    const tenantResult = await updateTenantAuthMethod(resolvedTenantId, 'oauth', installation.id);
 
-    // Redirect to success page
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/success?installation=${installation.id}`
-    );
+    // Redirect to success page with installation ID and API key
+    const successUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/onboarding/success`);
+    successUrl.searchParams.set('installation', installation.id);
+    if (tenantResult.apiKey) {
+      successUrl.searchParams.set('apiKey', tenantResult.apiKey);
+    }
+    
+    return NextResponse.redirect(successUrl.toString());
   } catch (error) {
     console.error('OAuth callback error:', error);
     return NextResponse.redirect(
@@ -126,13 +130,55 @@ async function encryptToken(token: string): Promise<string> {
   return iv.toString('base64') + ':' + authTag.toString('base64') + ':' + encrypted;
 }
 
-// Temporary storage functions (replace with actual database)
+// Database storage functions
 async function storeOAuthInstallation(installation: any) {
-  // TODO: Implement database storage
-  console.log('Storing OAuth installation:', installation);
+  try {
+    // Store the OAuth installation in the database
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/oauth-installation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'internal-secret',
+      },
+      body: JSON.stringify(installation),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to store OAuth installation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to store OAuth installation:', error);
+    throw error;
+  }
 }
 
 async function updateTenantAuthMethod(tenantId: string, method: string, installationId: string) {
-  // TODO: Update tenant in database to use OAuth
-  console.log('Updating tenant auth method:', { tenantId, method, installationId });
+  try {
+    // Create or update tenant with OAuth auth method
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/tenant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'internal-secret',
+      },
+      body: JSON.stringify({
+        tenantId,
+        authMethod: method,
+        oauthInstallationId: installationId,
+        // Generate a subdomain from the tenant ID
+        subdomain: `tenant-${tenantId.slice(0, 8)}`,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create/update tenant');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to update tenant auth method:', error);
+    throw error;
+  }
 }
