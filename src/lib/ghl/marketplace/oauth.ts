@@ -138,29 +138,153 @@ export class GHLOAuth {
    * Get all required OAuth scopes for full MCP functionality
    */
   static getAllRequiredScopes(): string[] {
+    // Complete marketplace OAuth scopes for full MCP functionality
     return [
-      'contacts.readonly',
-      'contacts.write',
-      'conversations.readonly',
-      'conversations.write',
-      'opportunities.readonly',
-      'opportunities.write',
+      // Calendars
       'calendars.readonly',
       'calendars.write',
-      'locations.readonly',
-      'locations.write',
-      'workflows.readonly',
+      'calendars/events.readonly',
+      'calendars/events.write',
+      'calendars/groups.readonly',
+      'calendars/groups.write',
+      'calendars/resources.readonly',
+      'calendars/resources.write',
+      
+      // Campaigns
       'campaigns.readonly',
-      'blogs.readonly',
-      'blogs.write',
-      'users.readonly',
-      'custom_objects.readonly',
-      'custom_objects.write',
+      
+      // Conversations - CRITICAL for message history & sending
+      'conversations.readonly',
+      'conversations.write',
+      'conversations/message.readonly',
+      'conversations/message.write',
+      'conversations/reports.readonly',
+      'conversations/livechat.write',
+      
+      // Contacts - CRITICAL for notes & custom fields
+      'contacts.readonly',
+      'contacts.write',
+      
+      // Custom Objects
+      'objects/schema.readonly',
+      'objects/schema.write',
+      'objects/record.readonly',
+      'objects/record.write',
+      
+      // Associations
+      'associations.write',
+      'associations.readonly',
+      'associations/relation.readonly',
+      'associations/relation.write',
+      
+      // Courses
+      'courses.write',
+      'courses.readonly',
+      
+      // Forms
+      'forms.readonly',
+      'forms.write',
+      
+      // Invoices
       'invoices.readonly',
       'invoices.write',
-      'payments.readonly',
+      'invoices/schedule.readonly',
+      'invoices/schedule.write',
+      'invoices/template.readonly',
+      'invoices/template.write',
+      'invoices/estimate.readonly',
+      'invoices/estimate.write',
+      
+      // Links
+      'links.readonly',
+      'links.write',
+      'lc-email.readonly',
+      
+      // Locations - CRITICAL for custom fields
+      'locations.readonly',
+      'locations/customValues.readonly',
+      'locations/customValues.write',
+      'locations/customFields.readonly',
+      'locations/customFields.write',
+      'locations/tasks.readonly',
+      'locations/tasks.write',
+      'locations/tags.readonly',
+      'locations/tags.write',
+      'locations/templates.readonly',
+      
+      // Media
+      'medias.readonly',
+      'medias.write',
+      
+      // Funnels
+      'funnels/redirect.readonly',
+      'funnels/page.readonly',
+      'funnels/funnel.readonly',
+      'funnels/pagecount.readonly',
+      'funnels/redirect.write',
+      
+      // OAuth
+      'oauth.write',
+      'oauth.readonly',
+      
+      // Opportunities
+      'opportunities.readonly',
+      'opportunities.write',
+      
+      // Payments
+      'payments/orders.readonly',
+      'payments/orders.write',
+      'payments/integration.readonly',
+      'payments/integration.write',
+      'payments/transactions.readonly',
+      'payments/subscriptions.readonly',
+      'payments/coupons.readonly',
+      'payments/coupons.write',
+      'payments/custom-provider.readonly',
+      'payments/custom-provider.write',
+      
+      // Products
       'products.readonly',
       'products.write',
+      'products/prices.readonly',
+      'products/prices.write',
+      'products/collection.readonly',
+      'products/collection.write',
+      
+      // Social Planner
+      'socialplanner/oauth.readonly',
+      'socialplanner/oauth.write',
+      'socialplanner/post.readonly',
+      'socialplanner/post.write',
+      'socialplanner/account.readonly',
+      'socialplanner/account.write',
+      'socialplanner/csv.readonly',
+      'socialplanner/csv.write',
+      'socialplanner/category.readonly',
+      'socialplanner/tag.readonly',
+      'socialplanner/tag.write',
+      'socialplanner/statistics.readonly',
+      
+      // Store
+      'store/shipping.readonly',
+      
+      // Surveys
+      'surveys.readonly',
+      
+      // Users
+      'users.readonly',
+      'users.write',
+      
+      // Workflows
+      'workflows.readonly',
+      
+      // Email Builder
+      'emails/builder.write',
+      'emails/builder.readonly',
+      'emails/schedule.readonly',
+      
+      // Twilio
+      'twilioaccount.read'
     ];
   }
 }
