@@ -67,14 +67,14 @@ export async function POST(request: NextRequest) {
       if (!postInitHealth.healthy) {
         throw new Error(`Schema initialization failed: ${postInitHealth.error}`)
       }
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Database schema initialized successfully',
+        tables: postInitHealth.tables,
+        timestamp: new Date().toISOString()
+      })
     }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Database schema initialized successfully',
-      tables: postInitHealth.tables,
-      timestamp: new Date().toISOString()
-    })
 
   } catch (error) {
     console.error('Database initialization error:', error)
