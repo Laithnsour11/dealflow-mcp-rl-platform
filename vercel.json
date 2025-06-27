@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "ghl-mcp-rl-platform",
   "framework": "nextjs",
   "functions": {
     "src/app/api/health/route.ts": {
