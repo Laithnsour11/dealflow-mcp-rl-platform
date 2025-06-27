@@ -621,6 +621,6 @@ export function createTenantGHLClient(tenant: Tenant, decryptedApiKey: string): 
   return new TenantGHLClientV2({
     apiKey: decryptedApiKey,
     locationId: tenant.ghl_location_id,
-    baseUrl: process.env.GHL_BASE_URL
+    baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com'
   });
 }
