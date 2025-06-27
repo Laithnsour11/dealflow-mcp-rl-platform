@@ -37,6 +37,9 @@ export class TenantGHLClientV2 {
     this.socialMediaTools = new SocialMediaTools(this.apiKey, this.locationId, this.baseUrl);
     this.userTools = new UserTools(this.apiKey, this.locationId, this.baseUrl);
     this.customObjectTools = new CustomObjectTools(this.apiKey, this.locationId, this.baseUrl);
+    
+    // Bind tool methods after initialization
+    this.bindToolMethods();
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
@@ -370,119 +373,231 @@ export class TenantGHLClientV2 {
     });
   }
 
+  private bindToolMethods() {
+    // Invoice & Billing Tools (39 tools)
+    this.createInvoiceTemplate = this.invoiceTools.createInvoiceTemplate.bind(this.invoiceTools);
+    this.listInvoiceTemplates = this.invoiceTools.listInvoiceTemplates.bind(this.invoiceTools);
+    this.getInvoiceTemplate = this.invoiceTools.getInvoiceTemplate.bind(this.invoiceTools);
+    this.updateInvoiceTemplate = this.invoiceTools.updateInvoiceTemplate.bind(this.invoiceTools);
+    this.deleteInvoiceTemplate = this.invoiceTools.deleteInvoiceTemplate.bind(this.invoiceTools);
+    this.updateInvoiceTemplateLateFees = this.invoiceTools.updateInvoiceTemplateLateFees.bind(this.invoiceTools);
+    this.updateInvoiceTemplatePaymentMethods = this.invoiceTools.updateInvoiceTemplatePaymentMethods.bind(this.invoiceTools);
+    this.createInvoiceSchedule = this.invoiceTools.createInvoiceSchedule.bind(this.invoiceTools);
+    this.listInvoiceSchedules = this.invoiceTools.listInvoiceSchedules.bind(this.invoiceTools);
+    this.getInvoiceSchedule = this.invoiceTools.getInvoiceSchedule.bind(this.invoiceTools);
+    this.updateInvoiceSchedule = this.invoiceTools.updateInvoiceSchedule.bind(this.invoiceTools);
+    this.deleteInvoiceSchedule = this.invoiceTools.deleteInvoiceSchedule.bind(this.invoiceTools);
+    this.scheduleInvoiceSchedule = this.invoiceTools.scheduleInvoiceSchedule.bind(this.invoiceTools);
+    this.autoPaymentInvoiceSchedule = this.invoiceTools.autoPaymentInvoiceSchedule.bind(this.invoiceTools);
+    this.cancelInvoiceSchedule = this.invoiceTools.cancelInvoiceSchedule.bind(this.invoiceTools);
+    this.createInvoice = this.invoiceTools.createInvoice.bind(this.invoiceTools);
+    this.listInvoices = this.invoiceTools.listInvoices.bind(this.invoiceTools);
+    this.getInvoice = this.invoiceTools.getInvoice.bind(this.invoiceTools);
+    this.updateInvoice = this.invoiceTools.updateInvoice.bind(this.invoiceTools);
+    this.deleteInvoice = this.invoiceTools.deleteInvoice.bind(this.invoiceTools);
+    this.voidInvoice = this.invoiceTools.voidInvoice.bind(this.invoiceTools);
+    this.sendInvoice = this.invoiceTools.sendInvoice.bind(this.invoiceTools);
+    this.recordInvoicePayment = this.invoiceTools.recordInvoicePayment.bind(this.invoiceTools);
+    this.generateInvoiceNumber = this.invoiceTools.generateInvoiceNumber.bind(this.invoiceTools);
+    this.text2payInvoice = this.invoiceTools.text2payInvoice.bind(this.invoiceTools);
+    this.createEstimate = this.invoiceTools.createEstimate.bind(this.invoiceTools);
+    this.listEstimates = this.invoiceTools.listEstimates.bind(this.invoiceTools);
+    this.getEstimate = this.invoiceTools.getEstimate.bind(this.invoiceTools);
+    this.updateEstimate = this.invoiceTools.updateEstimate.bind(this.invoiceTools);
+    this.deleteEstimate = this.invoiceTools.deleteEstimate.bind(this.invoiceTools);
+    this.sendEstimate = this.invoiceTools.sendEstimate.bind(this.invoiceTools);
+    this.createInvoiceFromEstimate = this.invoiceTools.createInvoiceFromEstimate.bind(this.invoiceTools);
+    this.generateEstimateNumber = this.invoiceTools.generateEstimateNumber.bind(this.invoiceTools);
+    this.listEstimateTemplates = this.invoiceTools.listEstimateTemplates.bind(this.invoiceTools);
+    this.createEstimateTemplate = this.invoiceTools.createEstimateTemplate.bind(this.invoiceTools);
+    this.getEstimateTemplate = this.invoiceTools.getEstimateTemplate.bind(this.invoiceTools);
+    this.updateEstimateTemplate = this.invoiceTools.updateEstimateTemplate.bind(this.invoiceTools);
+    this.deleteEstimateTemplate = this.invoiceTools.deleteEstimateTemplate.bind(this.invoiceTools);
+    this.previewEstimateTemplate = this.invoiceTools.previewEstimateTemplate.bind(this.invoiceTools);
+
+    // Payment Tools (20 tools)
+    this.createWhitelabelIntegrationProvider = this.paymentTools.createWhitelabelIntegrationProvider.bind(this.paymentTools);
+    this.listWhitelabelIntegrationProviders = this.paymentTools.listWhitelabelIntegrationProviders.bind(this.paymentTools);
+    this.listOrders = this.paymentTools.listOrders.bind(this.paymentTools);
+    this.getOrderById = this.paymentTools.getOrderById.bind(this.paymentTools);
+    this.createOrderFulfillment = this.paymentTools.createOrderFulfillment.bind(this.paymentTools);
+    this.listOrderFulfillments = this.paymentTools.listOrderFulfillments.bind(this.paymentTools);
+    this.listTransactions = this.paymentTools.listTransactions.bind(this.paymentTools);
+    this.getTransactionById = this.paymentTools.getTransactionById.bind(this.paymentTools);
+    this.listSubscriptions = this.paymentTools.listSubscriptions.bind(this.paymentTools);
+    this.getSubscriptionById = this.paymentTools.getSubscriptionById.bind(this.paymentTools);
+    this.listCoupons = this.paymentTools.listCoupons.bind(this.paymentTools);
+    this.createCoupon = this.paymentTools.createCoupon.bind(this.paymentTools);
+    this.updateCoupon = this.paymentTools.updateCoupon.bind(this.paymentTools);
+    this.deleteCoupon = this.paymentTools.deleteCoupon.bind(this.paymentTools);
+    this.getCoupon = this.paymentTools.getCoupon.bind(this.paymentTools);
+    this.createCustomProviderIntegration = this.paymentTools.createCustomProviderIntegration.bind(this.paymentTools);
+    this.deleteCustomProviderIntegration = this.paymentTools.deleteCustomProviderIntegration.bind(this.paymentTools);
+    this.getCustomProviderConfig = this.paymentTools.getCustomProviderConfig.bind(this.paymentTools);
+    this.createCustomProviderConfig = this.paymentTools.createCustomProviderConfig.bind(this.paymentTools);
+    this.updateCustomProviderConfig = this.paymentTools.updateCustomProviderConfig.bind(this.paymentTools);
+
+    // Social Media Tools (17 tools)
+    this.searchSocialPosts = this.socialMediaTools.searchSocialPosts.bind(this.socialMediaTools);
+    this.createSocialPost = this.socialMediaTools.createSocialPost.bind(this.socialMediaTools);
+    this.getSocialPost = this.socialMediaTools.getSocialPost.bind(this.socialMediaTools);
+    this.updateSocialPost = this.socialMediaTools.updateSocialPost.bind(this.socialMediaTools);
+    this.deleteSocialPost = this.socialMediaTools.deleteSocialPost.bind(this.socialMediaTools);
+    this.bulkDeleteSocialPosts = this.socialMediaTools.bulkDeleteSocialPosts.bind(this.socialMediaTools);
+    this.getSocialAccounts = this.socialMediaTools.getSocialAccounts.bind(this.socialMediaTools);
+    this.deleteSocialAccount = this.socialMediaTools.deleteSocialAccount.bind(this.socialMediaTools);
+    this.startSocialOAuth = this.socialMediaTools.startSocialOAuth.bind(this.socialMediaTools);
+    this.uploadSocialCSV = this.socialMediaTools.uploadSocialCSV.bind(this.socialMediaTools);
+    this.getCSVUploadStatus = this.socialMediaTools.getCSVUploadStatus.bind(this.socialMediaTools);
+    this.setCSVAccounts = this.socialMediaTools.setCSVAccounts.bind(this.socialMediaTools);
+    this.getSocialCategories = this.socialMediaTools.getSocialCategories.bind(this.socialMediaTools);
+    this.getSocialTags = this.socialMediaTools.getSocialTags.bind(this.socialMediaTools);
+    this.getSocialTagsByIds = this.socialMediaTools.getSocialTagsByIds.bind(this.socialMediaTools);
+    this.reviewSocialPost = this.socialMediaTools.reviewSocialPost.bind(this.socialMediaTools);
+    this.updateReviewStatus = this.socialMediaTools.updateReviewStatus.bind(this.socialMediaTools);
+
+    // User Tools (15 tools)
+    this.getUsers = this.userTools.getUsers.bind(this.userTools);
+    this.getUser = this.userTools.getUser.bind(this.userTools);
+    this.createUser = this.userTools.createUser.bind(this.userTools);
+    this.updateUser = this.userTools.updateUser.bind(this.userTools);
+    this.deleteUser = this.userTools.deleteUser.bind(this.userTools);
+    this.getUserByEmail = this.userTools.getUserByEmail.bind(this.userTools);
+    this.getUserPermissions = this.userTools.getUserPermissions.bind(this.userTools);
+    this.updateUserPermissions = this.userTools.updateUserPermissions.bind(this.userTools);
+    this.getUserRoles = this.userTools.getUserRoles.bind(this.userTools);
+    this.assignUserRole = this.userTools.assignUserRole.bind(this.userTools);
+    this.removeUserRole = this.userTools.removeUserRole.bind(this.userTools);
+    this.getTeams = this.userTools.getTeams.bind(this.userTools);
+    this.createTeam = this.userTools.createTeam.bind(this.userTools);
+    this.updateTeam = this.userTools.updateTeam.bind(this.userTools);
+    this.deleteTeam = this.userTools.deleteTeam.bind(this.userTools);
+
+    // Custom Object Tools (9 tools)
+    this.getAllObjects = this.customObjectTools.getAllObjects.bind(this.customObjectTools);
+    this.createObjectSchema = this.customObjectTools.createObjectSchema.bind(this.customObjectTools);
+    this.getObjectSchema = this.customObjectTools.getObjectSchema.bind(this.customObjectTools);
+    this.updateObjectSchema = this.customObjectTools.updateObjectSchema.bind(this.customObjectTools);
+    this.createObjectRecord = this.customObjectTools.createObjectRecord.bind(this.customObjectTools);
+    this.getObjectRecord = this.customObjectTools.getObjectRecord.bind(this.customObjectTools);
+    this.updateObjectRecord = this.customObjectTools.updateObjectRecord.bind(this.customObjectTools);
+    this.deleteObjectRecord = this.customObjectTools.deleteObjectRecord.bind(this.customObjectTools);
+    this.searchObjectRecords = this.customObjectTools.searchObjectRecords.bind(this.customObjectTools);
+  }
+
   // ============================================
   // Delegate to specialized tool classes
   // ============================================
   
   // Invoice & Billing Tools (39 tools)
-  createInvoiceTemplate = this.invoiceTools.createInvoiceTemplate.bind(this.invoiceTools);
-  listInvoiceTemplates = this.invoiceTools.listInvoiceTemplates.bind(this.invoiceTools);
-  getInvoiceTemplate = this.invoiceTools.getInvoiceTemplate.bind(this.invoiceTools);
-  updateInvoiceTemplate = this.invoiceTools.updateInvoiceTemplate.bind(this.invoiceTools);
-  deleteInvoiceTemplate = this.invoiceTools.deleteInvoiceTemplate.bind(this.invoiceTools);
-  updateInvoiceTemplateLateFees = this.invoiceTools.updateInvoiceTemplateLateFees.bind(this.invoiceTools);
-  updateInvoiceTemplatePaymentMethods = this.invoiceTools.updateInvoiceTemplatePaymentMethods.bind(this.invoiceTools);
-  createInvoiceSchedule = this.invoiceTools.createInvoiceSchedule.bind(this.invoiceTools);
-  listInvoiceSchedules = this.invoiceTools.listInvoiceSchedules.bind(this.invoiceTools);
-  getInvoiceSchedule = this.invoiceTools.getInvoiceSchedule.bind(this.invoiceTools);
-  updateInvoiceSchedule = this.invoiceTools.updateInvoiceSchedule.bind(this.invoiceTools);
-  deleteInvoiceSchedule = this.invoiceTools.deleteInvoiceSchedule.bind(this.invoiceTools);
-  scheduleInvoiceSchedule = this.invoiceTools.scheduleInvoiceSchedule.bind(this.invoiceTools);
-  autoPaymentInvoiceSchedule = this.invoiceTools.autoPaymentInvoiceSchedule.bind(this.invoiceTools);
-  cancelInvoiceSchedule = this.invoiceTools.cancelInvoiceSchedule.bind(this.invoiceTools);
-  createInvoice = this.invoiceTools.createInvoice.bind(this.invoiceTools);
-  listInvoices = this.invoiceTools.listInvoices.bind(this.invoiceTools);
-  getInvoice = this.invoiceTools.getInvoice.bind(this.invoiceTools);
-  updateInvoice = this.invoiceTools.updateInvoice.bind(this.invoiceTools);
-  deleteInvoice = this.invoiceTools.deleteInvoice.bind(this.invoiceTools);
-  voidInvoice = this.invoiceTools.voidInvoice.bind(this.invoiceTools);
-  sendInvoice = this.invoiceTools.sendInvoice.bind(this.invoiceTools);
-  recordInvoicePayment = this.invoiceTools.recordInvoicePayment.bind(this.invoiceTools);
-  generateInvoiceNumber = this.invoiceTools.generateInvoiceNumber.bind(this.invoiceTools);
-  text2payInvoice = this.invoiceTools.text2payInvoice.bind(this.invoiceTools);
-  createEstimate = this.invoiceTools.createEstimate.bind(this.invoiceTools);
-  listEstimates = this.invoiceTools.listEstimates.bind(this.invoiceTools);
-  getEstimate = this.invoiceTools.getEstimate.bind(this.invoiceTools);
-  updateEstimate = this.invoiceTools.updateEstimate.bind(this.invoiceTools);
-  deleteEstimate = this.invoiceTools.deleteEstimate.bind(this.invoiceTools);
-  sendEstimate = this.invoiceTools.sendEstimate.bind(this.invoiceTools);
-  createInvoiceFromEstimate = this.invoiceTools.createInvoiceFromEstimate.bind(this.invoiceTools);
-  generateEstimateNumber = this.invoiceTools.generateEstimateNumber.bind(this.invoiceTools);
-  listEstimateTemplates = this.invoiceTools.listEstimateTemplates.bind(this.invoiceTools);
-  createEstimateTemplate = this.invoiceTools.createEstimateTemplate.bind(this.invoiceTools);
-  getEstimateTemplate = this.invoiceTools.getEstimateTemplate.bind(this.invoiceTools);
-  updateEstimateTemplate = this.invoiceTools.updateEstimateTemplate.bind(this.invoiceTools);
-  deleteEstimateTemplate = this.invoiceTools.deleteEstimateTemplate.bind(this.invoiceTools);
-  previewEstimateTemplate = this.invoiceTools.previewEstimateTemplate.bind(this.invoiceTools);
+  createInvoiceTemplate: any;
+  listInvoiceTemplates: any;
+  getInvoiceTemplate: any;
+  updateInvoiceTemplate: any;
+  deleteInvoiceTemplate: any;
+  updateInvoiceTemplateLateFees: any;
+  updateInvoiceTemplatePaymentMethods: any;
+  createInvoiceSchedule: any;
+  listInvoiceSchedules: any;
+  getInvoiceSchedule: any;
+  updateInvoiceSchedule: any;
+  deleteInvoiceSchedule: any;
+  scheduleInvoiceSchedule: any;
+  autoPaymentInvoiceSchedule: any;
+  cancelInvoiceSchedule: any;
+  createInvoice: any;
+  listInvoices: any;
+  getInvoice: any;
+  updateInvoice: any;
+  deleteInvoice: any;
+  voidInvoice: any;
+  sendInvoice: any;
+  recordInvoicePayment: any;
+  generateInvoiceNumber: any;
+  text2payInvoice: any;
+  createEstimate: any;
+  listEstimates: any;
+  getEstimate: any;
+  updateEstimate: any;
+  deleteEstimate: any;
+  sendEstimate: any;
+  createInvoiceFromEstimate: any;
+  generateEstimateNumber: any;
+  listEstimateTemplates: any;
+  createEstimateTemplate: any;
+  getEstimateTemplate: any;
+  updateEstimateTemplate: any;
+  deleteEstimateTemplate: any;
+  previewEstimateTemplate: any;
 
   // Payment Tools (20 tools)
-  createWhitelabelIntegrationProvider = this.paymentTools.createWhitelabelIntegrationProvider.bind(this.paymentTools);
-  listWhitelabelIntegrationProviders = this.paymentTools.listWhitelabelIntegrationProviders.bind(this.paymentTools);
-  listOrders = this.paymentTools.listOrders.bind(this.paymentTools);
-  getOrderById = this.paymentTools.getOrderById.bind(this.paymentTools);
-  createOrderFulfillment = this.paymentTools.createOrderFulfillment.bind(this.paymentTools);
-  listOrderFulfillments = this.paymentTools.listOrderFulfillments.bind(this.paymentTools);
-  listTransactions = this.paymentTools.listTransactions.bind(this.paymentTools);
-  getTransactionById = this.paymentTools.getTransactionById.bind(this.paymentTools);
-  listSubscriptions = this.paymentTools.listSubscriptions.bind(this.paymentTools);
-  getSubscriptionById = this.paymentTools.getSubscriptionById.bind(this.paymentTools);
-  listCoupons = this.paymentTools.listCoupons.bind(this.paymentTools);
-  createCoupon = this.paymentTools.createCoupon.bind(this.paymentTools);
-  updateCoupon = this.paymentTools.updateCoupon.bind(this.paymentTools);
-  deleteCoupon = this.paymentTools.deleteCoupon.bind(this.paymentTools);
-  getCoupon = this.paymentTools.getCoupon.bind(this.paymentTools);
-  createCustomProviderIntegration = this.paymentTools.createCustomProviderIntegration.bind(this.paymentTools);
-  deleteCustomProviderIntegration = this.paymentTools.deleteCustomProviderIntegration.bind(this.paymentTools);
-  getCustomProviderConfig = this.paymentTools.getCustomProviderConfig.bind(this.paymentTools);
-  createCustomProviderConfig = this.paymentTools.createCustomProviderConfig.bind(this.paymentTools);
-  updateCustomProviderConfig = this.paymentTools.updateCustomProviderConfig.bind(this.paymentTools);
+  createWhitelabelIntegrationProvider: any;
+  listWhitelabelIntegrationProviders: any;
+  listOrders: any;
+  getOrderById: any;
+  createOrderFulfillment: any;
+  listOrderFulfillments: any;
+  listTransactions: any;
+  getTransactionById: any;
+  listSubscriptions: any;
+  getSubscriptionById: any;
+  listCoupons: any;
+  createCoupon: any;
+  updateCoupon: any;
+  deleteCoupon: any;
+  getCoupon: any;
+  createCustomProviderIntegration: any;
+  deleteCustomProviderIntegration: any;
+  getCustomProviderConfig: any;
+  createCustomProviderConfig: any;
+  updateCustomProviderConfig: any;
 
   // Social Media Tools (17 tools)
-  searchSocialPosts = this.socialMediaTools.searchSocialPosts.bind(this.socialMediaTools);
-  createSocialPost = this.socialMediaTools.createSocialPost.bind(this.socialMediaTools);
-  getSocialPost = this.socialMediaTools.getSocialPost.bind(this.socialMediaTools);
-  updateSocialPost = this.socialMediaTools.updateSocialPost.bind(this.socialMediaTools);
-  deleteSocialPost = this.socialMediaTools.deleteSocialPost.bind(this.socialMediaTools);
-  bulkDeleteSocialPosts = this.socialMediaTools.bulkDeleteSocialPosts.bind(this.socialMediaTools);
-  getSocialAccounts = this.socialMediaTools.getSocialAccounts.bind(this.socialMediaTools);
-  deleteSocialAccount = this.socialMediaTools.deleteSocialAccount.bind(this.socialMediaTools);
-  startSocialOAuth = this.socialMediaTools.startSocialOAuth.bind(this.socialMediaTools);
-  uploadSocialCSV = this.socialMediaTools.uploadSocialCSV.bind(this.socialMediaTools);
-  getCSVUploadStatus = this.socialMediaTools.getCSVUploadStatus.bind(this.socialMediaTools);
-  setCSVAccounts = this.socialMediaTools.setCSVAccounts.bind(this.socialMediaTools);
-  getSocialCategories = this.socialMediaTools.getSocialCategories.bind(this.socialMediaTools);
-  getSocialTags = this.socialMediaTools.getSocialTags.bind(this.socialMediaTools);
-  getSocialTagsByIds = this.socialMediaTools.getSocialTagsByIds.bind(this.socialMediaTools);
-  reviewSocialPost = this.socialMediaTools.reviewSocialPost.bind(this.socialMediaTools);
-  updateReviewStatus = this.socialMediaTools.updateReviewStatus.bind(this.socialMediaTools);
+  searchSocialPosts: any;
+  createSocialPost: any;
+  getSocialPost: any;
+  updateSocialPost: any;
+  deleteSocialPost: any;
+  bulkDeleteSocialPosts: any;
+  getSocialAccounts: any;
+  deleteSocialAccount: any;
+  startSocialOAuth: any;
+  uploadSocialCSV: any;
+  getCSVUploadStatus: any;
+  setCSVAccounts: any;
+  getSocialCategories: any;
+  getSocialTags: any;
+  getSocialTagsByIds: any;
+  reviewSocialPost: any;
+  updateReviewStatus: any;
 
   // User Tools (15 tools)
-  getUsers = this.userTools.getUsers.bind(this.userTools);
-  getUser = this.userTools.getUser.bind(this.userTools);
-  createUser = this.userTools.createUser.bind(this.userTools);
-  updateUser = this.userTools.updateUser.bind(this.userTools);
-  deleteUser = this.userTools.deleteUser.bind(this.userTools);
-  getUserByEmail = this.userTools.getUserByEmail.bind(this.userTools);
-  getUserPermissions = this.userTools.getUserPermissions.bind(this.userTools);
-  updateUserPermissions = this.userTools.updateUserPermissions.bind(this.userTools);
-  getUserRoles = this.userTools.getUserRoles.bind(this.userTools);
-  assignUserRole = this.userTools.assignUserRole.bind(this.userTools);
-  removeUserRole = this.userTools.removeUserRole.bind(this.userTools);
-  getTeams = this.userTools.getTeams.bind(this.userTools);
-  createTeam = this.userTools.createTeam.bind(this.userTools);
-  updateTeam = this.userTools.updateTeam.bind(this.userTools);
-  deleteTeam = this.userTools.deleteTeam.bind(this.userTools);
+  getUsers: any;
+  getUser: any;
+  createUser: any;
+  updateUser: any;
+  deleteUser: any;
+  getUserByEmail: any;
+  getUserPermissions: any;
+  updateUserPermissions: any;
+  getUserRoles: any;
+  assignUserRole: any;
+  removeUserRole: any;
+  getTeams: any;
+  createTeam: any;
+  updateTeam: any;
+  deleteTeam: any;
 
   // Custom Object Tools (9 tools)
-  getAllObjects = this.customObjectTools.getAllObjects.bind(this.customObjectTools);
-  createObjectSchema = this.customObjectTools.createObjectSchema.bind(this.customObjectTools);
-  getObjectSchema = this.customObjectTools.getObjectSchema.bind(this.customObjectTools);
-  updateObjectSchema = this.customObjectTools.updateObjectSchema.bind(this.customObjectTools);
-  createObjectRecord = this.customObjectTools.createObjectRecord.bind(this.customObjectTools);
-  getObjectRecord = this.customObjectTools.getObjectRecord.bind(this.customObjectTools);
-  updateObjectRecord = this.customObjectTools.updateObjectRecord.bind(this.customObjectTools);
-  deleteObjectRecord = this.customObjectTools.deleteObjectRecord.bind(this.customObjectTools);
-  searchObjectRecords = this.customObjectTools.searchObjectRecords.bind(this.customObjectTools);
+  getAllObjects: any;
+  createObjectSchema: any;
+  getObjectSchema: any;
+  updateObjectSchema: any;
+  createObjectRecord: any;
+  getObjectRecord: any;
+  updateObjectRecord: any;
+  deleteObjectRecord: any;
+  searchObjectRecords: any;
 
   // TODO: Add remaining tool implementations...
   // This is a subset showing the pattern. The full implementation would include all 269 tools.
