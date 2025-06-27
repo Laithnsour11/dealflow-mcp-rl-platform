@@ -108,10 +108,31 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.redirect(successUrl.toString());
-  } catch (error) {
+  } catch (error: any) {
     console.error('OAuth callback error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data,
+    });
+    
+    // More specific error handling
+    let errorMessage = 'callback_failed';
+    let errorDescription = error.message || 'Unknown error';
+    
+    if (error.message?.includes('ENCRYPTION_KEY')) {
+      errorMessage = 'encryption_error';
+      errorDescription = 'Missing encryption configuration';
+    } else if (error.message?.includes('token exchange')) {
+      errorMessage = 'token_exchange_failed';
+      errorDescription = 'Failed to exchange authorization code for tokens';
+    } else if (error.message?.includes('store OAuth installation')) {
+      errorMessage = 'storage_failed';
+      errorDescription = 'Failed to store OAuth installation';
+    }
+    
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=callback_failed`
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://dealflow-mcp-rl-platform.vercel.app'}/onboarding/error?error=${errorMessage}&description=${encodeURIComponent(errorDescription)}`
     );
   }
 }
