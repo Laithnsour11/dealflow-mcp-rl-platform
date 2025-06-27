@@ -194,10 +194,8 @@ const MCP_TOOLS = {
   'ghl_update_custom_field_folder': 'updateCustomFieldFolder',
   'ghl_delete_custom_field_folder': 'deleteCustomFieldFolder',
 
-  // Workflow Management (3 tools)
+  // Workflow Management (1 tool)
   'ghl_get_workflows': 'getWorkflows',
-  'add_contact_to_workflow': 'addContactToWorkflow',
-  'remove_contact_from_workflow': 'removeContactFromWorkflow',
 
   // Survey Management (2 tools)
   'ghl_get_surveys': 'getSurveys',
@@ -415,11 +413,7 @@ const MCP_TOOLS = {
   'delete_short_link': 'deleteShortLink',
   'get_link_analytics': 'getLinkAnalytics',
 
-  // Templates (12 tools)
-  'get_email_templates': 'getEmailTemplates',
-  'create_email_template': 'createEmailTemplate',
-  'update_email_template': 'updateEmailTemplate',
-  'delete_email_template': 'deleteEmailTemplate',
+  // Templates (8 tools - email templates are in Email Marketing section)
   'get_sms_templates': 'getSMSTemplates',
   'create_sms_template': 'createSMSTemplate',
   'update_sms_template': 'updateSMSTemplate',
@@ -966,4 +960,4 @@ function getToolParameters(toolName: string): Record<string, string> {
   }
   
   return parameters[toolName] || {}
-}
+}                                                                                                                                                                                                                                                                         
