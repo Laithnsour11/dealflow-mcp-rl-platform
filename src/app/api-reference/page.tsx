@@ -15,8 +15,24 @@ const MagnifyingGlassIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
+// Type definitions
+type Endpoint = {
+  tool: string;
+  method: string;
+  baseUrl?: string;
+  description: string;
+  params: Record<string, string>;
+  example: any;
+};
+
+type ApiCategory = {
+  name: string;
+  description: string;
+  endpoints: Endpoint[];
+};
+
 // API Reference data
-const apiCategories = [
+const apiCategories: ApiCategory[] = [
   {
     name: 'Contact Management',
     description: 'Manage contacts, tags, notes, and tasks',
@@ -169,7 +185,7 @@ export default function ApiReferencePage() {
     setTimeout(() => setCopiedEndpoint(null), 2000)
   }
 
-  const formatExample = (endpoint: any) => {
+  const formatExample = (endpoint: Endpoint) => {
     const baseUrl = endpoint.baseUrl || '/api/mcp/' + endpoint.tool
     return `curl -X POST ${process.env.NEXT_PUBLIC_APP_URL || 'https://your-app.vercel.app'}${baseUrl} \\
   -H "X-Tenant-API-Key: your-api-key" \\
@@ -291,7 +307,7 @@ export default function ApiReferencePage() {
                               {endpoint.method}
                             </span>
                             <code className="text-sm font-mono text-gray-800">
-                              {endpoint.baseUrl || '/api/mcp/' + endpoint.tool}
+                              {'baseUrl' in endpoint && endpoint.baseUrl ? endpoint.baseUrl : '/api/mcp/' + endpoint.tool}
                             </code>
                           </div>
                           <button
@@ -378,15 +394,4 @@ export default function ApiReferencePage() {
             {/* Rate Limits */}
             <div className="mt-6 bg-yellow-50 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Rate Limits</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Default: 100 requests per minute</li>
-                <li>• Enterprise: 1000 requests per minute</li>
-                <li>• Webhooks recommended for real-time updates</li>
-              </ul>
-            </div>
-          </main>
-        </div>
-      </div>
-    </div>
-  )
-}
+              <ul className="space-y-2 text

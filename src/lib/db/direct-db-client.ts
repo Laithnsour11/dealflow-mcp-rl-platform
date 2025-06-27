@@ -74,6 +74,11 @@ export class DirectDatabaseClient {
 // Create singleton instance
 export const directDb = new DirectDatabaseClient()
 
+// Export function for neon-database-manager
+export function getDirectDatabaseClient() {
+  return directDb;
+}
+
 // Helper for development/testing
 export const dbOperationsDirect = {
   async ensureSchema(): Promise<void> {
