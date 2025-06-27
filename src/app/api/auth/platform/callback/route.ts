@@ -163,4 +163,82 @@ async function encryptToken(token: string): Promise<string> {
   
   const authTag = cipher.getAuthTag();
   
-  return iv.toString
+  return iv.toString('base64') + ':' + authTag.toString('base64') + ':' + encrypted;
+}
+
+// Database storage functions
+async function storeOAuthInstallation(installation: any) {
+  try {
+    // Direct database access instead of HTTP call
+    const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager');
+    const db = neonDatabaseManager.getDatabase();
+    
+    const sql = `
+      INSERT INTO oauth_installations (
+        id, tenant_id, location_id, company_id,
+        access_token, refresh_token, expires_at, scopes,
+        installed_at, install_source, app_version
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ON CONFLICT (id) DO UPDATE SET
+        access_token = EXCLUDED.access_token,
+        refresh_token = EXCLUDED.refresh_token,
+        expires_at = EXCLUDED.expires_at,
+        scopes = EXCLUDED.scopes,
+        app_version = EXCLUDED.app_version
+      RETURNING *
+    `;
+    
+    const params = [
+      installation.id,
+      installation.tenant_id,
+      installation.location_id,
+      installation.company_id,
+      installation.access_token,
+      installation.refresh_token,
+      installation.expires_at,
+      installation.scopes,
+      installation.installed_at,
+      installation.install_source,
+      installation.app_version
+    ];
+    
+    const result = await db.executeSql(sql, params);
+    return { success: true, installation: result.data?.rows?.[0] || installation };
+  } catch (error) {
+    console.error('Failed to store OAuth installation:', error);
+    throw error;
+  }
+}
+
+async function updateTenantAuthMethod(tenantId: string, method: string, installationId: string) {
+  try {
+    // Direct database access
+    const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager');
+    const { tenantAuth } = await import('@/lib/auth/tenant-auth');
+    const db = neonDatabaseManager.getDatabase();
+    
+    const subdomain = `tenant-${tenantId.slice(0, 8)}`;
+    
+    // Upsert tenant
+    const tenantSql = `
+      INSERT INTO tenants (
+        tenant_id, subdomain, auth_method, oauth_installation_id
+      ) VALUES ($1, $2, $3, $4)
+      ON CONFLICT (tenant_id) DO UPDATE SET
+        auth_method = EXCLUDED.auth_method,
+        oauth_installation_id = EXCLUDED.oauth_installation_id,
+        updated_at = NOW()
+      RETURNING *
+    `;
+    
+    await db.executeSql(tenantSql, [tenantId, subdomain, method, installationId]);
+    
+    // Generate API key
+    const apiKey = await tenantAuth.generateApiKey(tenantId);
+    
+    return { success: true, apiKey };
+  } catch (error) {
+    console.error('Failed to update tenant auth method:', error);
+    throw error;
+  }
+}
