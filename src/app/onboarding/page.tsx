@@ -12,7 +12,7 @@ export default function OnboardingPage() {
     setLoading(true)
     try {
       // Use the simplified OAuth start endpoint that doesn't require subdomain
-      window.location.href = `/api/auth/ghl/start?userType=Location`;
+      window.location.href = `/api/auth/platform/start?userType=Location`;
     } catch (error) {
       console.error('Failed to start OAuth flow:', error)
       setLoading(false)
