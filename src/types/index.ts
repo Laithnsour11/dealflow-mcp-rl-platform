@@ -2,15 +2,17 @@
 export interface Tenant {
   id: string
   name: string
-  apiKey: string
-  ghlApiKey: string
-  ghlLocationId: string
-  plan: 'starter' | 'professional' | 'enterprise'
-  status: 'active' | 'suspended' | 'trial'
-  createdAt: Date
-  updatedAt: Date
-  usageQuota: number
-  currentUsage: number
+  subdomain: string
+  api_key_hash: string
+  encrypted_ghl_api_key: string
+  ghl_location_id: string
+  settings: Record<string, any>
+  is_active: boolean
+  created_at: Date
+  updated_at: Date
+  subscription_tier: 'free' | 'pro' | 'enterprise'
+  usage_limit: number
+  current_usage: number
 }
 
 export interface TenantAuth {
@@ -189,14 +191,16 @@ export interface GHLWebhookPayload {
 // Usage tracking types
 export interface UsageRecord {
   id: string
-  tenantId: string
+  tenant_id: string
   endpoint: string
   method: string
-  timestamp: Date
-  responseTime: number
-  status: number
-  tokensCost?: number
-  metadata?: Record<string, any>
+  request_size: number
+  response_size: number
+  status_code: number
+  processing_time: number
+  token_count?: number
+  cost?: number
+  created_at: Date
 }
 
 export interface UsageStats {
@@ -330,4 +334,35 @@ export interface ABTestResults {
   improvement: number
   significance: boolean
   detailedMetrics: Record<string, number>
+}
+
+// MCP Types
+export interface MCPTool {
+  name: string
+  description: string
+  inputSchema: Record<string, any>
+  outputSchema?: Record<string, any>
+}
+
+export interface MCPRequest {
+  tool: string
+  params: Record<string, any>
+  tenantId: string
+}
+
+export interface MCPResponse<T = any> {
+  result?: T
+  error?: string
+  metadata?: {
+    processingTime: number
+    tokenCount?: number
+    cost?: number
+  }
+}
+
+// Database Types
+export interface DatabaseConfig {
+  connectionString: string
+  ssl?: boolean
+  poolSize?: number
 }

@@ -19,7 +19,7 @@ export class RLClient {
 
   constructor(config: RLConfig = {}) {
     this.config = {
-      apiUrl: config.apiUrl || process.env.RL_API_BASE_URL || 'http://localhost:5002',
+      apiUrl: config.apiUrl || process.env.RL_API_BASE_URL || 'https://api.rl-system.com',
       internal: config.internal || process.env.RL_API_INTERNAL === 'true',
       maxRetries: config.maxRetries || 3,
       timeout: config.timeout || 30000,
@@ -242,7 +242,9 @@ export class RLClient {
             ...(process.env.RL_API_KEY && { 'Authorization': `Bearer ${process.env.RL_API_KEY}` })
           },
           body: method === 'POST' ? JSON.stringify(data) : undefined,
-          signal: AbortSignal.timeout(this.config.timeout!)
+          signal: 'AbortSignal' in global && 'timeout' in AbortSignal ? 
+            (AbortSignal as any).timeout(this.config.timeout!) : 
+            undefined // Fallback for older Node.js versions
         })
 
         if (!response.ok) {

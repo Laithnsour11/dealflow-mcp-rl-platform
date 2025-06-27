@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { tenantAuth } from '@/lib/auth/tenant-auth'
-import { createTenantGHLClient } from '@/lib/ghl-client/tenant-ghl-client'
+import { createTenantGHLClient } from '@/lib/ghl/tenant-client'
 
 // Available MCP tools mapping
 const MCP_TOOLS = {
@@ -130,7 +130,23 @@ async function handleMCPRequest(
     }
 
     // Create tenant-specific GHL client
-    const ghlClient = await createTenantGHLClient(tenant.tenantId)
+    // tenantConfig already has the decrypted GHL API key
+    const tenantData = {
+      id: tenantConfig.id,
+      name: tenantConfig.name,
+      subdomain: tenantConfig.name.toLowerCase().replace(/\s+/g, '-'),
+      api_key_hash: '',
+      encrypted_ghl_api_key: '',
+      ghl_location_id: tenantConfig.ghlLocationId,
+      settings: {},
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+      subscription_tier: tenantConfig.plan as 'free' | 'pro' | 'enterprise',
+      usage_limit: 1000,
+      current_usage: 0
+    }
+    const ghlClient = createTenantGHLClient(tenantData, tenantConfig.ghlApiKey)
     if (!ghlClient) {
       return NextResponse.json(
         { 
@@ -165,7 +181,16 @@ async function handleMCPRequest(
 
     // Execute the tool
     const methodName = MCP_TOOLS[toolName as keyof typeof MCP_TOOLS]
-    const result = await (ghlClient as any)[methodName](requestData)
+    
+    // Type-safe method call
+    type GHLClientMethod = (data: Record<string, any>) => Promise<any>
+    const clientMethod = ghlClient[methodName as keyof typeof ghlClient] as GHLClientMethod
+    
+    if (typeof clientMethod !== 'function') {
+      throw new Error(`Method ${methodName} not found on GHL client`)
+    }
+    
+    const result = await clientMethod(requestData)
 
     const responseTime = Date.now() - startTime
 
@@ -242,7 +267,7 @@ async function handleMCPRequest(
 /**
  * Calculate tokens cost based on tool usage
  */
-function calculateTokensCost(toolName: string, result: any): number {
+function calculateTokensCost(toolName: string, result: unknown): number {
   // Simple cost calculation - can be made more sophisticated
   const baseCost = 0.001 // Base cost per API call
   const dataCost = JSON.stringify(result).length * 0.000001 // Cost per byte of response
@@ -339,9 +364,9 @@ function getToolCategory(toolName: string): string {
   return 'General'
 }
 
-function getToolParameters(toolName: string): Record<string, any> {
+function getToolParameters(toolName: string): Record<string, string> {
   // Define expected parameters for each tool
-  const parameters: Record<string, any> = {
+  const parameters: Record<string, Record<string, string>> = {
     'get_contact': { contactId: 'string (required)' },
     'create_contact': { firstName: 'string', lastName: 'string', email: 'string', phone: 'string' },
     'send_sms': { contactId: 'string (required)', message: 'string (required)' },

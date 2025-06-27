@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server'
 import { dbOperations } from '@/lib/db/neon-mcp-client'
 import { Tenant, TenantAuth, APIError } from '@/types'
-import crypto from 'crypto'
+import * as crypto from 'crypto'
 
 export class TenantAuthService {
   private static instance: TenantAuthService
@@ -41,7 +41,8 @@ export class TenantAuthService {
    */
   private encrypt(text: string): string {
     const algorithm = 'aes-256-gcm'
-    const key = Buffer.from(process.env.ENCRYPTION_KEY || 'default-32-char-key-change-prod!!', 'utf8').subarray(0, 32)
+    const encryptionKey = process.env.ENCRYPTION_KEY || 'default-32-char-key-change-prod!!'
+    const key = Buffer.from(encryptionKey.padEnd(32, '0').slice(0, 32), 'utf8')
     const iv = crypto.randomBytes(16)
     
     const cipher = crypto.createCipheriv(algorithm, key, iv)
@@ -53,13 +54,25 @@ export class TenantAuthService {
   }
 
   /**
+   * Decrypt API key for tenant
+   */
+  async decryptApiKey(encryptedKey: string): Promise<string> {
+    return this.decrypt(encryptedKey)
+  }
+
+  /**
    * Decrypt sensitive data
    */
   private decrypt(encryptedText: string): string {
     const algorithm = 'aes-256-gcm'
-    const key = Buffer.from(process.env.ENCRYPTION_KEY || 'default-32-char-key-change-prod!!', 'utf8').subarray(0, 32)
+    const encryptionKey = process.env.ENCRYPTION_KEY || 'default-32-char-key-change-prod!!'
+    const key = Buffer.from(encryptionKey.padEnd(32, '0').slice(0, 32), 'utf8')
     
-    const [ivHex, authTagHex, encrypted] = encryptedText.split(':')
+    const parts = encryptedText.split(':')
+    if (parts.length !== 3) {
+      throw new Error('Invalid encrypted text format')
+    }
+    const [ivHex, authTagHex, encrypted] = parts
     const iv = Buffer.from(ivHex, 'hex')
     const authTag = Buffer.from(authTagHex, 'hex')
     
@@ -112,15 +125,17 @@ export class TenantAuthService {
       const tenant: Tenant = {
         id: tenantRow.id,
         name: tenantRow.name,
-        apiKey: apiKey, // Only return in creation response
-        ghlApiKey: tenantData.ghlApiKey, // Only return in creation response
-        ghlLocationId: tenantData.ghlLocationId,
-        plan: tenantRow.plan,
-        status: tenantRow.status,
-        createdAt: tenantRow.created_at,
-        updatedAt: tenantRow.updated_at,
-        usageQuota: tenantRow.usage_quota,
-        currentUsage: tenantRow.current_usage
+        subdomain: tenantRow.subdomain,
+        api_key_hash: tenantRow.api_key_hash,
+        encrypted_ghl_api_key: tenantRow.ghl_api_key_encrypted,
+        ghl_location_id: tenantData.ghlLocationId,
+        settings: tenantRow.settings || {},
+        is_active: tenantRow.status === 'active',
+        created_at: tenantRow.created_at,
+        updated_at: tenantRow.updated_at,
+        subscription_tier: tenantRow.plan as 'free' | 'pro' | 'enterprise',
+        usage_limit: tenantRow.usage_quota,
+        current_usage: tenantRow.current_usage
       }
 
       return { tenant, apiKey }

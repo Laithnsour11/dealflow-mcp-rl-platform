@@ -4,6 +4,7 @@
  */
 
 import { APIResponse } from '@/types'
+import { getSchemaStatements } from './schema-constants'
 
 interface NeonMCPConfig {
   mcpServerUrl?: string
@@ -18,13 +19,13 @@ export class NeonMCPClient {
 
   constructor(config: NeonMCPConfig = {}) {
     this.config = config
-    this.mcpServerUrl = config.mcpServerUrl || 'http://localhost:8000'
+    this.mcpServerUrl = config.mcpServerUrl || process.env.NEON_MCP_SERVER_URL || 'https://mcp.neon.tech'
   }
 
   /**
    * Execute SQL using Neon MCP server
    */
-  async executeSql(sql: string, params?: any[]): Promise<APIResponse> {
+  async executeSql(sql: string, params?: unknown[]): Promise<APIResponse> {
     try {
       const response = await fetch(`${this.mcpServerUrl}/api/mcp/sql`, {
         method: 'POST',
@@ -140,18 +141,13 @@ export class NeonMCPClient {
    */
   async initializeSchema(): Promise<APIResponse> {
     try {
-      // Read the schema file
-      const fs = await import('fs')
-      const path = await import('path')
+      // Check if we're in a Node.js environment
+      if (typeof window !== 'undefined') {
+        throw new Error('initializeSchema can only be called from server-side code')
+      }
       
-      const schemaPath = path.join(process.cwd(), 'src/lib/db/schema.sql')
-      const schemaSQL = fs.readFileSync(schemaPath, 'utf8')
-
-      // Split into individual statements
-      const statements = schemaSQL
-        .split(';')
-        .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'))
+      // Get schema statements from constant
+      const statements = getSchemaStatements()
 
       // Execute as transaction
       return await this.executeTransaction(statements)
@@ -176,7 +172,11 @@ export class NeonMCPClient {
         }
       }
 
-      const tables = tablesResponse.data || []
+      interface TableInfo {
+        table_name: string
+      }
+      
+      const tables: TableInfo[] = tablesResponse.data || []
       const requiredTables = [
         'tenants',
         'usage_records', 
@@ -190,12 +190,12 @@ export class NeonMCPClient {
       ]
 
       const missingTables = requiredTables.filter(table => 
-        !tables.some((t: any) => t.table_name === table)
+        !tables.some((t) => t.table_name === table)
       )
 
       return {
         healthy: missingTables.length === 0,
-        tables: tables.map((t: any) => t.table_name),
+        tables: tables.map((t) => t.table_name),
         error: missingTables.length > 0 ? `Missing tables: ${missingTables.join(', ')}` : undefined
       }
     } catch (error) {
@@ -317,26 +317,26 @@ export const dbOperations = {
   /**
    * Execute a query with error handling
    */
-  async query(sql: string, params?: any[]): Promise<any> {
+  async query<T = any>(sql: string, params?: unknown[]): Promise<T> {
     const result = await neonMCP.executeSql(sql, params)
     
     if (!result.success) {
       throw new Error(`Database query failed: ${result.error}`)
     }
     
-    return result.data
+    return result.data as T
   },
 
   /**
    * Execute multiple queries in a transaction
    */
-  async transaction(queries: string[]): Promise<any> {
+  async transaction<T = any>(queries: string[]): Promise<T> {
     const result = await neonMCP.executeTransaction(queries)
     
     if (!result.success) {
       throw new Error(`Database transaction failed: ${result.error}`)
     }
     
-    return result.data
+    return result.data as T
   }
 }

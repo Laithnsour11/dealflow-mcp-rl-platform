@@ -166,17 +166,17 @@ function determineFocusArea(analysis: any): string {
   const { personalityIndicators, motivationIndicators, objectionIndicators } = analysis
   
   // Determine what the agent should focus on
-  const maxObjection = Math.max(...Object.values(objectionIndicators))
+  const maxObjection = Math.max(...Object.values(objectionIndicators) as number[])
   if (maxObjection > 0.5) {
     return 'objection_handling'
   }
   
-  const maxPersonality = Math.max(...Object.values(personalityIndicators))
+  const maxPersonality = Math.max(...Object.values(personalityIndicators) as number[])
   if (maxPersonality > 0.3) {
     return 'personality_adaptation'
   }
   
-  const maxMotivation = Math.max(...Object.values(motivationIndicators))
+  const maxMotivation = Math.max(...Object.values(motivationIndicators) as number[])
   if (maxMotivation > 0.3) {
     return 'motivation_alignment'
   }
