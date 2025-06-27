@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Create or update tenant in database
     const db = neonDatabaseManager.getDatabase();
-    const result = await db.sql`
+    const sql = `
       INSERT INTO tenants (
         id,
         subdomain,
@@ -37,25 +37,27 @@ export async function POST(request: NextRequest) {
         oauth_installation_id,
         created_at,
         updated_at
-      ) VALUES (
-        ${tenantId},
-        ${subdomain},
-        ${hashedApiKey},
-        ${authMethod},
-        ${oauthInstallationId},
-        NOW(),
-        NOW()
-      )
+      ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
       ON CONFLICT (id) DO UPDATE SET
         auth_method = EXCLUDED.auth_method,
         oauth_installation_id = EXCLUDED.oauth_installation_id,
         updated_at = NOW()
       RETURNING id, subdomain, auth_method, created_at
     `;
+    
+    const params = [
+      tenantId,
+      subdomain,
+      hashedApiKey,
+      authMethod,
+      oauthInstallationId
+    ];
+    
+    const result = await db.executeSql(sql, params);
 
     return NextResponse.json({
       success: true,
-      tenant: result[0],
+      tenant: result.data?.rows?.[0] || { id: tenantId, subdomain, auth_method: authMethod },
       apiKey, // Return unhashed API key only on creation
     });
   } catch (error: any) {

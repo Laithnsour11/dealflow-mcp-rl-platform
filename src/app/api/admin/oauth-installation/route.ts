@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // Store OAuth installation in database
     const db = neonDatabaseManager.getDatabase();
-    const result = await db.sql`
+    const sql = `
       INSERT INTO oauth_installations (
         id,
         tenant_id,
@@ -33,19 +33,7 @@ export async function POST(request: NextRequest) {
         installed_at,
         install_source,
         app_version
-      ) VALUES (
-        ${installation.id},
-        ${installation.tenant_id},
-        ${installation.location_id},
-        ${installation.company_id},
-        ${installation.access_token},
-        ${installation.refresh_token},
-        ${installation.expires_at},
-        ${installation.scopes},
-        ${installation.installed_at},
-        ${installation.install_source},
-        ${installation.app_version}
-      )
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       ON CONFLICT (id) DO UPDATE SET
         access_token = EXCLUDED.access_token,
         refresh_token = EXCLUDED.refresh_token,
@@ -54,10 +42,26 @@ export async function POST(request: NextRequest) {
         app_version = EXCLUDED.app_version
       RETURNING *
     `;
+    
+    const params = [
+      installation.id,
+      installation.tenant_id,
+      installation.location_id,
+      installation.company_id,
+      installation.access_token,
+      installation.refresh_token,
+      installation.expires_at,
+      installation.scopes,
+      installation.installed_at,
+      installation.install_source,
+      installation.app_version
+    ];
+    
+    const result = await db.executeSql(sql, params);
 
     return NextResponse.json({
       success: true,
-      installation: result[0],
+      installation: result.data?.rows?.[0] || installation,
     });
   } catch (error: any) {
     console.error('Failed to store OAuth installation:', error);

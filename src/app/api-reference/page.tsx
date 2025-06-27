@@ -394,4 +394,15 @@ export default function ApiReferencePage() {
             {/* Rate Limits */}
             <div className="mt-6 bg-yellow-50 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Rate Limits</h3>
-              <ul className="space-y-2 text
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Default: 100 requests per minute</li>
+                <li>• Enterprise: 1000 requests per minute</li>
+                <li>• Webhooks recommended for real-time updates</li>
+              </ul>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  )
+}
