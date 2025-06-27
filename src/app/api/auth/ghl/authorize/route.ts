@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GHLOAuth } from '@/lib/ghl/marketplace/oauth';
 import { tenantAuth } from '@/lib/auth/tenant-auth';
 import { cookies } from 'next/headers';
+import { oauthStateStore } from '@/lib/ghl/marketplace/oauth-state-store';
 
 export async function GET(request: NextRequest) {
   try {
@@ -126,22 +127,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Temporary state storage (should be replaced with Redis or database)
-const oauthStates = new Map<string, { tenantId: string; createdAt: Date }>();
-
 async function storeOAuthState(state: string, tenantId: string) {
-  oauthStates.set(state, {
-    tenantId,
-    createdAt: new Date(),
-  });
-
-  // Clean up expired states
-  const now = Date.now();
-  for (const [key, value] of oauthStates.entries()) {
-    if (now - value.createdAt.getTime() > 600000) { // 10 minutes
-      oauthStates.delete(key);
-    }
-  }
+  oauthStateStore.add(state, tenantId);
 }
-
-export { oauthStates }; // Export for use in callback

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GHLOAuth } from '@/lib/ghl/marketplace/oauth';
 import { tenantAuth } from '@/lib/auth/tenant-auth';
 import { cookies } from 'next/headers';
-import { oauthStates } from '../authorize/route';
+import { oauthStateStore } from '@/lib/ghl/marketplace/oauth-state-store';
 import * as crypto from 'crypto';
 
 export async function GET(request: NextRequest) {
@@ -44,11 +44,10 @@ export async function GET(request: NextRequest) {
       isValidState = true;
     } else {
       // Fallback to in-memory state (for API-based flow)
-      const stateData = oauthStates.get(state);
-      if (stateData) {
+      const verifyResult = oauthStateStore.verify(state);
+      if (verifyResult.valid && verifyResult.tenantId) {
         isValidState = true;
-        resolvedTenantId = stateData.tenantId;
-        oauthStates.delete(state); // Clean up
+        resolvedTenantId = verifyResult.tenantId;
       }
     }
 
