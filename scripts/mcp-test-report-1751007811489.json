@@ -1,0 +1,112 @@
+{
+  "passed": 3,
+  "failed": 17,
+  "warnings": 1,
+  "details": [
+    {
+      "name": "Register tenant1",
+      "status": "pass",
+      "details": "ID: ed04958b-8fb5-4b20-9a86-33427f158b4e"
+    },
+    {
+      "name": "Register tenant2",
+      "status": "pass",
+      "details": "ID: 811d7cbe-b261-4ba8-ab1f-8c23b1a6a3ce"
+    },
+    {
+      "name": "Search Contacts",
+      "status": "fail",
+      "details": "Invalid API key"
+    },
+    {
+      "name": "Create Contact",
+      "status": "fail",
+      "details": "Invalid API key"
+    },
+    {
+      "name": "Get Contact by ID",
+      "status": "pass",
+      "details": "Expected error received"
+    },
+    {
+      "name": "Get Conversations",
+      "status": "fail",
+      "details": "Tool 'get_conversations' not supported"
+    },
+    {
+      "name": "Get Opportunities",
+      "status": "fail",
+      "details": "Tool 'get_opportunities' not supported"
+    },
+    {
+      "name": "Get Pipelines",
+      "status": "fail",
+      "details": "Invalid API key"
+    },
+    {
+      "name": "Get Calendars",
+      "status": "fail",
+      "details": "Invalid API key"
+    },
+    {
+      "name": "Get Custom Fields",
+      "status": "fail",
+      "details": "Tool 'get_custom_fields' not supported"
+    },
+    {
+      "name": "Get Analytics",
+      "status": "fail",
+      "details": "Tool 'get_analytics' not supported"
+    },
+    {
+      "name": "List Available Tools",
+      "status": "fail",
+      "details": "Invalid API key"
+    },
+    {
+      "name": "Create contact with Tenant 1",
+      "status": "fail",
+      "details": "Failed to create contact"
+    },
+    {
+      "name": "Rate limiting active",
+      "status": "warning",
+      "details": "No rate limiting detected in burst test"
+    },
+    {
+      "name": "Invalid tool name",
+      "status": "fail",
+      "details": "Expected 404, got 400"
+    },
+    {
+      "name": "Missing required parameters",
+      "status": "fail",
+      "details": "Expected 400, got 401"
+    },
+    {
+      "name": "Invalid JSON body",
+      "status": "fail",
+      "details": "Expected 400, got 401"
+    },
+    {
+      "name": "No authentication",
+      "status": "fail",
+      "details": "Expected 401, got 400"
+    },
+    {
+      "name": "Simple GET performance",
+      "status": "fail",
+      "details": "Request failed"
+    },
+    {
+      "name": "Complex query performance",
+      "status": "fail",
+      "details": "Request failed"
+    },
+    {
+      "name": "Tool discovery performance",
+      "status": "fail",
+      "details": "Request failed"
+    }
+  ]
+}

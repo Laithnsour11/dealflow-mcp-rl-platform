@@ -5,6 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { dbOperations } from '@/lib/db/neon-mcp-client'
+import { dbOperationsDirect } from '@/lib/db/direct-db-client'
 import { Tenant, TenantAuth, APIError } from '@/types'
 import * as crypto from 'crypto'
 
@@ -119,6 +120,28 @@ export class TenantAuthService {
         tenantData.usageQuota || 1000
       ]
 
+      // For development, create a mock tenant
+      if (process.env.NODE_ENV === 'development') {
+        const mockTenantId = crypto.randomUUID()
+        const tenant: Tenant = {
+          id: mockTenantId,
+          name: tenantData.name,
+          subdomain: tenantData.name.toLowerCase().replace(/\s+/g, '-'),
+          api_key_hash: apiKeyHash,
+          encrypted_ghl_api_key: encryptedGhlKey,
+          ghl_location_id: tenantData.ghlLocationId,
+          settings: {},
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+          subscription_tier: (tenantData.plan || 'free') as 'free' | 'pro' | 'enterprise',
+          usage_limit: tenantData.usageQuota || 1000,
+          current_usage: 0
+        }
+        
+        return { tenant, apiKey }
+      }
+      
       const result = await dbOperations.query(query, params)
       const tenantRow = result[0]
 
@@ -163,6 +186,15 @@ export class TenantAuthService {
         WHERE api_key_hash = $1 AND status = 'active'
       `
 
+      // For development, create a mock authenticated tenant
+      if (process.env.NODE_ENV === 'development' && (apiKey.startsWith('tenant_') || apiKey.startsWith('ghl_mcp_'))) {
+        return {
+          tenantId: 'dev-tenant-123',
+          apiKey: apiKey,
+          permissions: this.getPermissionsForPlan('pro')
+        }
+      }
+      
       const result = await dbOperations.query(query, [apiKeyHash])
       
       if (!result || result.length === 0) {
@@ -208,6 +240,18 @@ export class TenantAuthService {
         WHERE id = $1 AND status = 'active'
       `
 
+      // For development, return mock config
+      if (process.env.NODE_ENV === 'development' && tenantId === 'dev-tenant-123') {
+        return {
+          id: 'dev-tenant-123',
+          name: 'Development Tenant',
+          ghlApiKey: 'dev-ghl-api-key',
+          ghlLocationId: 'dev-location-123',
+          plan: 'pro',
+          status: 'active'
+        }
+      }
+      
       const result = await dbOperations.query(query, [tenantId])
       
       if (!result || result.length === 0) {
@@ -278,6 +322,19 @@ export class TenantAuthService {
     metadata?: Record<string, any>
   ): Promise<void> {
     try {
+      // For development, just log the usage
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Usage recorded:', {
+          tenantId,
+          endpoint,
+          method,
+          responseTime,
+          statusCode,
+          tokensCost
+        })
+        return
+      }
+      
       const query = `
         INSERT INTO usage_records (
           tenant_id, endpoint, method, response_time, status_code, tokens_cost, metadata

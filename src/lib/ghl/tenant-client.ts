@@ -18,6 +18,11 @@ class TenantGHLClient {
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
+    // For development, return mock data
+    if (process.env.NODE_ENV === 'development') {
+      return this.getMockResponse(endpoint, options);
+    }
+    
     const url = `${this.baseUrl}${endpoint}`;
     const response = await fetch(url, {
       ...options,
@@ -34,6 +39,75 @@ class TenantGHLClient {
     }
 
     return response.json();
+  }
+  
+  private getMockResponse(endpoint: string, options: RequestInit) {
+    // Return mock data based on endpoint
+    if (endpoint.includes('/contacts/v1/') && options.method === 'POST') {
+      return {
+        id: 'contact_' + Date.now(),
+        firstName: JSON.parse(options.body as string).firstName,
+        lastName: JSON.parse(options.body as string).lastName,
+        email: JSON.parse(options.body as string).email,
+        phone: JSON.parse(options.body as string).phone,
+        tags: JSON.parse(options.body as string).tags || [],
+        createdAt: new Date().toISOString(),
+        locationId: this.locationId
+      };
+    }
+    
+    if (endpoint.includes('/contacts/v1/')) {
+      return {
+        contacts: [],
+        total: 0,
+        page: 1,
+        pageSize: 10
+      };
+    }
+    
+    if (endpoint.includes('/pipelines')) {
+      return {
+        pipelines: [
+          {
+            id: 'pipeline_1',
+            name: 'Sales Pipeline',
+            stages: [
+              { id: 'stage_1', name: 'Lead' },
+              { id: 'stage_2', name: 'Qualified' },
+              { id: 'stage_3', name: 'Proposal' },
+              { id: 'stage_4', name: 'Closed' }
+            ]
+          }
+        ]
+      };
+    }
+    
+    if (endpoint.includes('/calendars')) {
+      return {
+        calendars: [
+          {
+            id: 'cal_1',
+            name: 'Main Calendar',
+            timezone: 'America/New_York'
+          }
+        ]
+      };
+    }
+    
+    if (endpoint.includes('/customFields')) {
+      return {
+        customFields: [
+          {
+            id: 'field_1',
+            name: 'Lead Source',
+            type: 'text'
+          }
+        ]
+      };
+    }
+    
+    // Default empty response
+    return { success: true, data: [] };
   }
 
   // Contact methods

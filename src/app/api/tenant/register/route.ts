@@ -7,8 +7,8 @@ const registrationSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
   subdomain: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/),
-  ghlApiKey: z.string().min(10),
-  ghlLocationId: z.string().min(10),
+  ghlApiKey: z.string().min(1),
+  ghlLocationId: z.string().min(1),
   plan: z.enum(['free', 'pro', 'enterprise']).default('free'),
 })
 

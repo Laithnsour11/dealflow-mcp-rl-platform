@@ -182,15 +182,65 @@ async function handleMCPRequest(
     // Execute the tool
     const methodName = MCP_TOOLS[toolName as keyof typeof MCP_TOOLS]
     
-    // Type-safe method call
-    type GHLClientMethod = (data: Record<string, any>) => Promise<any>
-    const clientMethod = ghlClient[methodName as keyof typeof ghlClient] as GHLClientMethod
+    if (!methodName) {
+      throw new Error(`Unknown MCP tool: ${toolName}`)
+    }
+    
+    // Get the method from the GHL client
+    const clientMethod = (ghlClient as any)[methodName]
     
     if (typeof clientMethod !== 'function') {
       throw new Error(`Method ${methodName} not found on GHL client`)
     }
     
-    const result = await clientMethod(requestData)
+    // Call the method with appropriate parameters based on the tool
+    let result
+    
+    // Handle methods that expect specific parameter structures
+    if (methodName === 'getContactById' || methodName === 'updateContact' || methodName === 'deleteContact') {
+      result = await clientMethod.call(ghlClient, requestData.contactId, requestData)
+    } else if (methodName === 'searchContacts') {
+      result = await clientMethod.call(ghlClient, requestData.query || '')
+    } else if (methodName === 'addContactTags' || methodName === 'removeContactTags') {
+      result = await clientMethod.call(ghlClient, requestData.contactId, requestData.tags || [])
+    } else if (methodName === 'sendMessage') {
+      result = await clientMethod.call(ghlClient, requestData.conversationId, requestData.message)
+    } else if (methodName === 'updateOpportunity' || methodName === 'deleteOpportunity') {
+      result = await clientMethod.call(ghlClient, requestData.opportunityId, requestData)
+    } else if (methodName === 'moveOpportunityStage') {
+      result = await clientMethod.call(ghlClient, requestData.opportunityId, requestData.stageId)
+    } else if (methodName === 'getStages') {
+      result = await clientMethod.call(ghlClient, requestData.pipelineId)
+    } else if (methodName === 'updateAppointment' || methodName === 'deleteAppointment') {
+      result = await clientMethod.call(ghlClient, requestData.appointmentId, requestData)
+    } else if (methodName === 'updateTask' || methodName === 'deleteTask' || methodName === 'completeTask') {
+      result = await clientMethod.call(ghlClient, requestData.taskId, requestData)
+    } else if (methodName === 'createNote' || methodName === 'getNotes') {
+      result = await clientMethod.call(ghlClient, requestData.contactId, requestData.body)
+    } else if (methodName === 'updateNote' || methodName === 'deleteNote') {
+      result = await clientMethod.call(ghlClient, requestData.contactId, requestData.noteId, requestData.body)
+    } else if (methodName === 'triggerWorkflow') {
+      result = await clientMethod.call(ghlClient, requestData.workflowId, requestData.contactId)
+    } else if (methodName === 'getFormSubmissions' || methodName === 'getSurveySubmissions') {
+      result = await clientMethod.call(ghlClient, requestData.formId || requestData.surveyId)
+    } else if (methodName === 'addContactToCampaign' || methodName === 'removeContactFromCampaign') {
+      result = await clientMethod.call(ghlClient, requestData.campaignId, requestData.contactId)
+    } else if (methodName === 'updateCustomValues' || methodName === 'getCustomValues') {
+      result = await clientMethod.call(ghlClient, requestData.contactId, requestData.customFields)
+    } else if (methodName === 'getUserById') {
+      result = await clientMethod.call(ghlClient, requestData.userId)
+    } else if (methodName === 'createWebhook') {
+      result = await clientMethod.call(ghlClient, requestData.url, requestData.events || [])
+    } else if (methodName === 'updateWebhook' || methodName === 'deleteWebhook') {
+      result = await clientMethod.call(ghlClient, requestData.webhookId, requestData)
+    } else if (methodName === 'updateLocation') {
+      result = await clientMethod.call(ghlClient, requestData)
+    } else if (methodName === 'getReportingData') {
+      result = await clientMethod.call(ghlClient, requestData.reportType, requestData)
+    } else {
+      // Default: pass all request data as a single parameter
+      result = await clientMethod.call(ghlClient, requestData)
+    }
 
     const responseTime = Date.now() - startTime
 
