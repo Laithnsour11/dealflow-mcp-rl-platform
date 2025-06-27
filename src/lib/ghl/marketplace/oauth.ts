@@ -2,7 +2,7 @@
  * GoHighLevel OAuth 2.0 Implementation for Marketplace Apps
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 interface OAuthConfig {
   clientId: string;
