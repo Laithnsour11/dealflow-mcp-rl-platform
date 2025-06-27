@@ -39,24 +39,39 @@ export async function GET(request: NextRequest) {
     const storedState = cookieStore.get('ghl_oauth_state')?.value;
     const provisionalTenantId = cookieStore.get('provisional_tenant_id')?.value;
 
+    console.log('OAuth callback state verification:', {
+      receivedState: state,
+      storedState: storedState ? 'present' : 'missing',
+      provisionalTenantId: provisionalTenantId ? 'present' : 'missing',
+      allCookies: cookieStore.getAll().map(c => c.name),
+    });
+
     let isValidState = false;
     let resolvedTenantId = provisionalTenantId;
 
     // Check cookie state first
     if (storedState && GHLOAuth.verifyState(state, storedState)) {
       isValidState = true;
+      console.log('State validated via cookie');
     } else {
       // Fallback to in-memory state (for API-based flow)
       const verifyResult = oauthStateStore.verify(state);
+      console.log('In-memory state verification:', verifyResult);
       if (verifyResult.valid && verifyResult.tenantId) {
         isValidState = true;
         resolvedTenantId = verifyResult.tenantId;
+        console.log('State validated via in-memory store');
       }
     }
 
     if (!isValidState) {
+      console.error('State validation failed:', {
+        receivedState: state,
+        storedState,
+        cookiesPresent: cookieStore.getAll().map(c => c.name),
+      });
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=invalid_state`
+        `${process.env.NEXT_PUBLIC_APP_URL || 'https://dealflow-mcp-rl-platform.vercel.app'}/onboarding/error?error=invalid_state&description=${encodeURIComponent('OAuth state validation failed. Please try again.')}`
       );
     }
 
@@ -148,58 +163,4 @@ async function encryptToken(token: string): Promise<string> {
   
   const authTag = cipher.getAuthTag();
   
-  return iv.toString('base64') + ':' + authTag.toString('base64') + ':' + encrypted;
-}
-
-// Database storage functions
-async function storeOAuthInstallation(installation: any) {
-  try {
-    // Store the OAuth installation in the database
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/oauth-installation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'internal-secret',
-      },
-      body: JSON.stringify(installation),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to store OAuth installation');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to store OAuth installation:', error);
-    throw error;
-  }
-}
-
-async function updateTenantAuthMethod(tenantId: string, method: string, installationId: string) {
-  try {
-    // Create or update tenant with OAuth auth method
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/tenant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'internal-secret',
-      },
-      body: JSON.stringify({
-        tenantId,
-        authMethod: method,
-        oauthInstallationId: installationId,
-        // Generate a subdomain from the tenant ID
-        subdomain: `tenant-${tenantId.slice(0, 8)}`,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create/update tenant');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to update tenant auth method:', error);
-    throw error;
-  }
-}
+  return iv.toString

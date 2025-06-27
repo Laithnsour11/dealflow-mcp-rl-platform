@@ -32,10 +32,19 @@ export async function GET(request: NextRequest) {
     
     // Also store in cookies for browser flow
     const cookieStore = cookies();
+    
+    // Log cookie setting attempt
+    console.log('Setting OAuth cookies:', {
+      state: state.substring(0, 10) + '...',
+      provisionalTenantId,
+      nodeEnv: process.env.NODE_ENV,
+      isProduction: process.env.NODE_ENV === 'production',
+    });
+    
     cookieStore.set('ghl_oauth_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none', // Changed from 'lax' to 'none' for cross-site OAuth flow
       maxAge: 60 * 10, // 10 minutes
       path: '/',
     });
@@ -43,7 +52,7 @@ export async function GET(request: NextRequest) {
     cookieStore.set('provisional_tenant_id', provisionalTenantId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none', // Changed from 'lax' to 'none' for cross-site OAuth flow
       maxAge: 60 * 60, // 1 hour
       path: '/',
     });
