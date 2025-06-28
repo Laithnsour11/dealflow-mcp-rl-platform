@@ -1,30 +1,20 @@
 /**
  * Direct database client for local development
- * Uses environment DATABASE_URL directly
+ * Uses Neon serverless client for actual database operations
  */
 
 import { getSchemaStatements } from './schema-constants'
+import { getNeonServerlessClient } from './neon-serverless-client'
 
 export class DirectDatabaseClient {
-  private databaseUrl: string
+  private neonClient: any
 
   constructor() {
-    this.databaseUrl = process.env.DATABASE_URL || ''
-    if (!this.databaseUrl) {
-      console.warn('DATABASE_URL not set - database operations will be mocked')
-    }
+    this.neonClient = getNeonServerlessClient()
   }
 
   async executeSql(sql: string, params?: any[]): Promise<any> {
-    console.log('Executing SQL:', sql.substring(0, 100) + '...')
-    
-    // For now, return mock response
-    // TODO: Implement actual database connection
-    console.warn('Database operations are currently mocked')
-    return {
-      success: true,
-      data: { rows: [], rowCount: 0 }
-    }
+    return this.neonClient.executeSql(sql, params)
   }
 
   async initializeSchema(): Promise<{ success: boolean; error?: string }> {

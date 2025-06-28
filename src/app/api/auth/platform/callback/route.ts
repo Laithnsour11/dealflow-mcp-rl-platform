@@ -109,18 +109,11 @@ export async function GET(request: NextRequest) {
       app_version: process.env.APP_VERSION || '1.0.0',
     };
 
-    // For now, skip database storage and just return success
-    // The installation data is encrypted and ready to be stored
-    console.log('OAuth installation ready:', {
-      id: installation.id,
-      tenant_id: installation.tenant_id,
-      location_id: installation.location_id,
-      scopes_count: installation.scopes.length,
-    });
+    // Store installation in database
+    await storeOAuthInstallation(installation);
 
-    // Generate a temporary API key for the success page
-    const tempApiKey = `ghl_${Buffer.from(crypto.randomBytes(32)).toString('base64url')}`;
-    const tenantResult = { success: true, apiKey: tempApiKey };
+    // Update tenant to use OAuth authentication
+    const tenantResult = await updateTenantAuthMethod(resolvedTenantId, 'oauth', installation.id);
 
     // Redirect to success page with installation ID and API key
     const successUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/onboarding/success`);
@@ -241,7 +234,7 @@ async function updateTenantAuthMethod(tenantId: string, method: string, installa
     await db.executeSql(tenantSql, [tenantId, subdomain, method, installationId]);
     
     // Generate API key
-    const apiKey = await tenantAuth.generateApiKey(tenantId);
+    const apiKey = await tenantAuth.generateApiKey();
     
     return { success: true, apiKey };
   } catch (error) {
