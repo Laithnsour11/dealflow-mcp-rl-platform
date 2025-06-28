@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { tenantAuth } from '@/lib/auth/tenant-auth'
 import { createTenantGHLClient } from '@/lib/ghl/tenant-client-v2'
+import { createTenantGHLClientFixed } from '@/lib/ghl/create-client-fix'
 
 // Available MCP tools mapping - 269 total tools
 const MCP_TOOLS = {
@@ -601,7 +602,7 @@ async function handleMCPRequest(
       usage_limit: 1000,
       current_usage: 0
     }
-    const ghlClient = createTenantGHLClient(tenantData, tenantConfig.ghlApiKey)
+    const ghlClient = createTenantGHLClientFixed(tenantData, tenantConfig.ghlApiKey)
     if (!ghlClient) {
       return NextResponse.json(
         { 

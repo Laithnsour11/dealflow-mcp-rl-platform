@@ -119,6 +119,12 @@
         <div id="apiKeyResults"></div>
     </div>
 
+    <div class="card">
+        <h2>API Keys Table</h2>
+        <button onclick="checkApiKeys()">Check API Keys Table</button>
+        <div id="apiKeysResults"></div>
+    </div>
+
     <script>
         const baseUrl = window.location.origin;
 
@@ -288,6 +294,28 @@
                     ` : ''}
                     <h4>All Recent Tenants:</h4>
                     <pre>${JSON.stringify(data.allTenants.recent, null, 2)}</pre>
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function checkApiKeys() {
+            const resultsDiv = document.getElementById('apiKeysResults');
+            resultsDiv.innerHTML = '<p>Checking API keys...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/debug/check-api-keys`);
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>API Keys Table Status</h3>
+                    <p>Total API Keys: ${data.apiKeys.total}</p>
+                    <p>Orphaned API Keys (no tenant): <span class="status ${data.orphanedApiKeys > 0 ? 'warning' : 'success'}">${data.orphanedApiKeys}</span></p>
+                    <h4>API Keys:</h4>
+                    <pre>${JSON.stringify(data.apiKeys.records, null, 2)}</pre>
+                    <h4>Tenants Without API Keys:</h4>
+                    <pre>${JSON.stringify(data.tenantsWithoutApiKeys, null, 2)}</pre>
                 `;
             } else {
                 resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
