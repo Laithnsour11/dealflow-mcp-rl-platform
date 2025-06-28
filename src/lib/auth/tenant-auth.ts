@@ -209,12 +209,14 @@ export class TenantAuthService {
       console.log('Authenticating with API key hash:', apiKeyHash.substring(0, 8) + '...')
       
       const query = `
-        SELECT tenant_id as id, subdomain as name, plan, status, 
-               COALESCE(usage_limit, 1000) as usage_quota, 
-               COALESCE(current_usage, 0) as current_usage,
-               ghl_location_id, oauth_installation_id
+        SELECT tenant_id as id, subdomain as name, 
+               auth_method as plan, 'active' as status,
+               1000 as usage_quota, 0 as current_usage,
+               location_id as ghl_location_id, oauth_installation_id
         FROM tenants 
-        WHERE api_key_hash = $1 AND status = 'active'
+        WHERE tenant_id IN (
+          SELECT tenant_id FROM api_keys WHERE key_hash = $1 AND is_active = true
+        )
       `
 
       // For development, create a mock authenticated tenant
@@ -285,9 +287,10 @@ export class TenantAuthService {
     try {
       const query = `
         SELECT tenant_id as id, subdomain as name, 
-               oauth_installation_id, ghl_location_id, plan, status
+               oauth_installation_id, location_id as ghl_location_id, 
+               auth_method as plan, 'active' as status
         FROM tenants 
-        WHERE tenant_id = $1 AND status = 'active'
+        WHERE tenant_id = $1
       `
 
       // For development, return mock config

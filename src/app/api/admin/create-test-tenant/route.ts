@@ -20,26 +20,17 @@ export async function POST(request: NextRequest) {
     // Create test tenant
     const result = await db.executeSql(
       `INSERT INTO tenants (
-        tenant_id, subdomain, auth_method, api_key_hash,
-        ghl_location_id, name, email, plan, status,
-        usage_limit, current_usage, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+        tenant_id, subdomain, auth_method, location_id,
+        created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, NOW(), NOW())
       ON CONFLICT (tenant_id) DO UPDATE SET
-        api_key_hash = EXCLUDED.api_key_hash,
         updated_at = NOW()
       RETURNING *`,
       [
         tenantId,
         subdomain,
         'api_key',
-        apiKeyHash,
-        'test-location-123',
-        'Test Tenant',
-        'test@example.com',
-        'starter',
-        'active',
-        1000,
-        0
+        'test-location-123'
       ]
     )
     

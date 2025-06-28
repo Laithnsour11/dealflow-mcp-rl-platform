@@ -35,13 +35,11 @@ export async function POST(request: NextRequest) {
         const result = await db.executeSql(
           `INSERT INTO tenants (
             tenant_id, subdomain, auth_method, oauth_installation_id,
-            api_key_hash, ghl_location_id, name, email, plan, status,
-            created_at, updated_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+            location_id, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
           ON CONFLICT (tenant_id) DO UPDATE SET
             oauth_installation_id = EXCLUDED.oauth_installation_id,
-            api_key_hash = EXCLUDED.api_key_hash,
-            ghl_location_id = EXCLUDED.ghl_location_id,
+            location_id = EXCLUDED.location_id,
             updated_at = NOW()
           RETURNING *`,
           [
@@ -49,12 +47,7 @@ export async function POST(request: NextRequest) {
             subdomain,
             'oauth',
             installation.id,
-            apiKeyHash,
-            installation.location_id,
-            subdomain,
-            `${subdomain}@dealflow.ai`,
-            'starter',
-            'active'
+            installation.location_id
           ]
         )
         

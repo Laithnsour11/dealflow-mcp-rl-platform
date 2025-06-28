@@ -231,17 +231,16 @@ async function updateTenantAuthMethod(tenantId: string, method: string, installa
     
     const locationId = installResult.data?.rows?.[0]?.location_id || '';
     
-    // Upsert tenant with API key hash
+    // Upsert tenant (without API key hash - that goes in api_keys table)
     const tenantSql = `
       INSERT INTO tenants (
         tenant_id, subdomain, auth_method, oauth_installation_id,
-        api_key_hash, ghl_location_id, name, email, plan, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        location_id, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
       ON CONFLICT (tenant_id) DO UPDATE SET
         auth_method = EXCLUDED.auth_method,
         oauth_installation_id = EXCLUDED.oauth_installation_id,
-        api_key_hash = EXCLUDED.api_key_hash,
-        ghl_location_id = EXCLUDED.ghl_location_id,
+        location_id = EXCLUDED.location_id,
         updated_at = NOW()
       RETURNING *
     `;
@@ -251,19 +250,15 @@ async function updateTenantAuthMethod(tenantId: string, method: string, installa
       subdomain, 
       method, 
       installationId,
-      apiKeyHash,
-      locationId,
-      subdomain, // name
-      `${subdomain}@dealflow.ai`, // email placeholder
-      'starter', // plan
-      'active' // status
+      locationId
     ]);
     
     // Store API key in api_keys table
     const apiKeySql = `
       INSERT INTO api_keys (
-        tenant_id, key_hash, key_prefix, name, is_active
-      ) VALUES ($1, $2, $3, $4, $5)
+        tenant_id, key_hash, key_prefix, name, is_active, created_at
+      ) VALUES ($1, $2, $3, $4, $5, NOW())
+      ON CONFLICT (key_hash) DO NOTHING
     `;
     
     await db.executeSql(apiKeySql, [
