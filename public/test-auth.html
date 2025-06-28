@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #545b62;
+        }
+        .button.success {
+            background: #28a745;
+        }
+        .button.success:hover {
+            background: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-indicator.green {
+            background: #28a745;
+        }
+        .status-indicator.red {
+            background: #dc3545;
+        }
+        .status-indicator.yellow {
+            background: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Authentication Test Dashboard</h1>
+        
+        <!-- System Status -->
+        <div class="section">
+            <h2>System Status</h2>
+            <button class="button" onclick="checkHealth()">Check Health</button>
+            <button class="button secondary" onclick="checkDatabaseHealth()">Check Database</button>
+            <button class="button secondary" onclick="runDiagnostics()">Run Full Diagnostics</button>
+            <button class="button secondary" onclick="checkSchema()">Check Schema</button>
+            <button class="button success" onclick="fixSchema()">Fix Schema</button>
+            <div id="healthResult" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Create Test Tenant -->
+        <div class="section">
+            <h2>Create Test Tenant</h2>
+            <label>Subdomain:</label>
+            <input type="text" id="subdomain" placeholder="test-tenant" value="test-tenant">
+            <label>Plan:</label>
+            <input type="text" id="plan" placeholder="pro" value="pro">
+            <button class="button success" onclick="createTestTenant()">Create Test Tenant</button>
+            <div id="createResult" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test Authentication -->
+        <div class="section">
+            <h2>Test Authentication</h2>
+            <label>API Key:</label>
+            <input type="text" id="apiKey" placeholder="ghl_mcp_...">
+            <button class="button" onclick="testApiKey()">Test API Key</button>
+            <button class="button secondary" onclick="testAuthenticatedRequest()">Test Authenticated Request</button>
+            <div id="authResult" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Recent Tenants -->
+        <div class="section">
+            <h2>Recent Test Tenants</h2>
+            <button class="button" onclick="getTestTenants()">Get Test Tenants</button>
+            <div id="tenantResult" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = window.location.origin;
+        
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${baseUrl}/api/health`);
+                const data = await response.json();
+                showResult('healthResult', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkDatabaseHealth() {
+            try {
+                const response = await fetch(`${baseUrl}/api/health/db`);
+                const data = await response.json();
+                showResult('healthResult', data, data.status === 'healthy' ? 'success' : 'error');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runDiagnostics() {
+            try {
+                const response = await fetch(`${baseUrl}/api/oauth-debug/diagnostics`);
+                const data = await response.json();
+                showResult('healthResult', data, 'info');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createTestTenant() {
+            try {
+                const subdomain = document.getElementById('subdomain').value || 'test-tenant';
+                const plan = document.getElementById('plan').value || 'pro';
+                
+                const response = await fetch(`${baseUrl}/api/admin/test-tenant`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ subdomain, plan })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.apiKey) {
+                    // Auto-fill the API key field
+                    document.getElementById('apiKey').value = data.apiKey;
+                    showResult('createResult', `Success! Tenant created.\n\nAPI Key: ${data.apiKey}\n\nTenant: ${JSON.stringify(data.tenant, null, 2)}`, 'success');
+                } else {
+                    showResult('createResult', data, 'error');
+                }
+            } catch (error) {
+                showResult('createResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testApiKey() {
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+                if (!apiKey) {
+                    showResult('authResult', 'Please enter an API key', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${baseUrl}/api/oauth-debug/diagnostics`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ apiKey })
+                });
+                
+                const data = await response.json();
+                showResult('authResult', data, data.authentication?.success ? 'success' : 'error');
+            } catch (error) {
+                showResult('authResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthenticatedRequest() {
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+                if (!apiKey) {
+                    showResult('authResult', 'Please enter an API key', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${baseUrl}/api/mcp/available-tools`, {
+                    headers: {
+                        'X-Tenant-API-Key': apiKey
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('authResult', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult('authResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getTestTenants() {
+            try {
+                const response = await fetch(`${baseUrl}/api/admin/test-tenant`);
+                const data = await response.json();
+                showResult('tenantResult', data, response.ok ? 'info' : 'error');
+            } catch (error) {
+                showResult('tenantResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkSchema() {
+            try {
+                const response = await fetch(`${baseUrl}/api/admin/fix-schema`);
+                const data = await response.json();
+                showResult('healthResult', data, response.ok ? 'info' : 'error');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function fixSchema() {
+            if (!confirm('This will apply schema fixes to the database. Continue?')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${baseUrl}/api/admin/fix-schema`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Admin-Key': 'admin' // Update this in production
+                    }
+                });
+                const data = await response.json();
+                showResult('healthResult', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Run initial health check
+        window.onload = () => {
+            checkHealth();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Debug Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Debug Dashboard</h1>
+    
+    <div class="card">
+        <h2>Database Health Check</h2>
+        <button onclick="checkHealth()">Check Database Health</button>
+        <div id="healthResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>Schema Check</h2>
+        <button onclick="checkSchema()">Check Database Schema</button>
+        <div id="schemaResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>OAuth Installation Fix</h2>
+        <p>This will create tenants for any OAuth installations that don't have corresponding tenant records.</p>
+        <button onclick="fixOAuthTenants()" class="success">Fix OAuth Tenants</button>
+        <div id="oauthResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>Create Test Tenant</h2>
+        <p>Create a test tenant with a valid API key for testing.</p>
+        <button onclick="createTestTenant()">Create Test Tenant</button>
+        <div id="testTenantResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>Test API Key</h2>
+        <input type="text" id="apiKeyInput" placeholder="Enter API key to test" style="width: 400px; padding: 8px; margin-right: 10px;">
+        <button onclick="testApiKey()">Test Authentication</button>
+        <button onclick="checkTenant()">Check Tenant Data</button>
+        <div id="apiKeyResults"></div>
+    </div>
+
+    <script>
+        const baseUrl = window.location.origin;
+
+        async function makeRequest(url, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                const response = await fetch(url, options);
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function checkHealth() {
+            const resultsDiv = document.getElementById('healthResults');
+            resultsDiv.innerHTML = '<p>Checking...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/health/db`);
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>Database Status</h3>
+                    <p>Status: <span class="status ${data.status === 'healthy' ? 'success' : 'error'}">${data.status}</span></p>
+                    <p>Connected: ${data.database.connected ? '✅' : '❌'}</p>
+                    <p>URL: ${data.database.url}</p>
+                    <p>Active Tenants: <strong>${data.tenants.active}</strong></p>
+                    <h4>Recent Tenants:</h4>
+                    <pre>${JSON.stringify(data.tenants.recent, null, 2)}</pre>
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function checkSchema() {
+            const resultsDiv = document.getElementById('schemaResults');
+            resultsDiv.innerHTML = '<p>Checking schema...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/admin/check-schema`);
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>Database Schema</h3>
+                    <h4>Tables:</h4>
+                    <pre>${JSON.stringify(data.tables.map(t => t.table_name), null, 2)}</pre>
+                    <h4>Tenants Table Columns:</h4>
+                    <pre>${JSON.stringify(data.tenants.columns, null, 2)}</pre>
+                    <h4>OAuth Installations: ${data.oauth_installations.count}</h4>
+                    <h4>Sample Tenant Data:</h4>
+                    <pre>${JSON.stringify(data.tenants.sampleData, null, 2)}</pre>
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function fixOAuthTenants() {
+            const resultsDiv = document.getElementById('oauthResults');
+            resultsDiv.innerHTML = '<p>Fixing OAuth tenants...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/admin/fix-oauth-tenant`, 'POST');
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>OAuth Fix Results</h3>
+                    <p>Orphaned Installations Found: ${data.orphanedInstallations}</p>
+                    <p>Fixed: <span class="status success">${data.fixed}</span></p>
+                    <p>Errors: <span class="status ${data.errors > 0 ? 'error' : 'success'}">${data.errors}</span></p>
+                    <h4>Database Stats:</h4>
+                    <pre>${JSON.stringify(data.stats, null, 2)}</pre>
+                    ${data.details.fixed.length > 0 ? `
+                        <h4>Fixed Tenants:</h4>
+                        <pre>${JSON.stringify(data.details.fixed, null, 2)}</pre>
+                    ` : ''}
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function createTestTenant() {
+            const resultsDiv = document.getElementById('testTenantResults');
+            resultsDiv.innerHTML = '<p>Creating test tenant...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/admin/create-test-tenant`, 'POST');
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>Test Tenant Created</h3>
+                    <p>Tenant ID: <code>${data.tenant.tenantId}</code></p>
+                    <p>Subdomain: <code>${data.tenant.subdomain}</code></p>
+                    <p>API Key: <code>${data.tenant.apiKey}</code></p>
+                    <button onclick="copyToClipboard('${data.tenant.apiKey}')">Copy API Key</button>
+                    <h4>Test Commands:</h4>
+                    <pre>${data.instructions.testAuth}</pre>
+                    <pre>${data.instructions.testEndpoint}</pre>
+                `;
+                // Auto-fill the API key input
+                document.getElementById('apiKeyInput').value = data.tenant.apiKey;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function testApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value;
+            if (!apiKey) {
+                alert('Please enter an API key');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('apiKeyResults');
+            resultsDiv.innerHTML = '<p>Testing API key...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/debug/auth`, 'POST', { apiKey });
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>Authentication Test</h3>
+                    <p>API Key Format: ${data.apiKey.validFormat ? '✅ Valid' : '❌ Invalid'}</p>
+                    <p>API Key Hash: <code>${data.apiKey.hash}</code></p>
+                    <p>Authentication: ${data.authentication.success ? '✅ Success' : '❌ Failed'}</p>
+                    ${data.authentication.tenantId ? `<p>Tenant ID: <code>${data.authentication.tenantId}</code></p>` : ''}
+                    ${data.authentication.permissions.length > 0 ? `<p>Permissions: ${data.authentication.permissions.join(', ')}</p>` : ''}
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        async function checkTenant() {
+            const apiKey = document.getElementById('apiKeyInput').value;
+            if (!apiKey) {
+                alert('Please enter an API key');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('apiKeyResults');
+            resultsDiv.innerHTML = '<p>Checking tenant data...</p>';
+            
+            const result = await makeRequest(`${baseUrl}/api/debug/tenant`, 'POST', { apiKey });
+            
+            if (result.success) {
+                const data = result.data;
+                resultsDiv.innerHTML = `
+                    <h3>Tenant Data Check</h3>
+                    <p>API Key Hash: <code>${data.apiKeyInfo.hash}</code></p>
+                    <p>Full Hash: <code>${data.apiKeyInfo.fullHash}</code></p>
+                    <p>Tenant Found: ${data.tenant.found ? '✅ Yes' : '❌ No'}</p>
+                    ${data.tenant.data ? `
+                        <h4>Tenant Details:</h4>
+                        <pre>${JSON.stringify(data.tenant.data, null, 2)}</pre>
+                    ` : ''}
+                    <h4>All Recent Tenants:</h4>
+                    <pre>${JSON.stringify(data.allTenants.recent, null, 2)}</pre>
+                `;
+            } else {
+                resultsDiv.innerHTML = `<p class="status error">Error: ${result.error || result.data.error}</p>`;
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Auto-check health on load
+        window.onload = () => {
+            checkHealth();
+        };
+    </script>
+</body>
+</html>
