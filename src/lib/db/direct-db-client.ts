@@ -4,31 +4,23 @@
  */
 
 import { getSchemaStatements } from './schema-constants'
-import { getNeonClient } from './neon-client'
 
 export class DirectDatabaseClient {
-  private neonClient: any
+  private databaseUrl: string
 
   constructor() {
-    try {
-      this.neonClient = getNeonClient()
-    } catch (error) {
-      console.error('Failed to initialize Neon client:', error)
-      // Fallback for local development without database
-      this.neonClient = null
+    this.databaseUrl = process.env.DATABASE_URL || ''
+    if (!this.databaseUrl) {
+      console.warn('DATABASE_URL not set - database operations will be mocked')
     }
   }
 
   async executeSql(sql: string, params?: any[]): Promise<any> {
     console.log('Executing SQL:', sql.substring(0, 100) + '...')
     
-    // Use Neon client if available
-    if (this.neonClient) {
-      return this.neonClient.executeSql(sql, params)
-    }
-    
-    // Fallback mock response for development
-    console.warn('No database connection - returning mock response')
+    // For now, return mock response
+    // TODO: Implement actual database connection
+    console.warn('Database operations are currently mocked')
     return {
       success: true,
       data: { rows: [], rowCount: 0 }
