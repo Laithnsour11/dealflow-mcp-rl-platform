@@ -58,4 +58,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Generate authorization URL
-    const authUrl =
+    const authUrl = oauth.getAuthorizationUrl(state, userType);
+
+    // Redirect to GoHighLevel
+    return NextResponse.redirect(authUrl);
+  } catch (error: any) {
+    console.error('Failed to start OAuth flow:', error);
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=oauth_start_failed&description=${encodeURIComponent(error.message)}`
+    );
+  }
+}
