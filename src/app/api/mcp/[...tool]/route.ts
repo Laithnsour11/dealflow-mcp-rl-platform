@@ -970,4 +970,8 @@ function getToolParameters(toolName: string): Record<string, string> {
     'send_sms': { contactId: 'string (required)', message: 'string (required)' },
     'send_email': { contactId: 'string (required)', subject: 'string (required)', body: 'string (required)' },
     'search_contacts': { query: 'string', tags: 'array', limit: 'number' },
-    'get_conversation_transcripts': { contactId: 'string', startDate: 'string', endDate: 
+    'get_conversation_transcripts': { contactId: 'string', startDate: 'string', endDate: 'string', includeTypes: 'array' }
+  }
+  
+  return parameters[toolName] || {}
+}
