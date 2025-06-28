@@ -10,7 +10,7 @@ import { locationMethods } from './location-methods';
 export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: string): any {
   const client = new TenantGHLClientV2({
     apiKey: decryptedApiKey,
-    locationId: tenant.ghl_location_id || tenant.location_id || '',
+    locationId: tenant.ghl_location_id || '',
     baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com'
   });
 
