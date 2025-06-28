@@ -11,10 +11,17 @@ export class NeonServerlessClient {
   constructor() {
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
-      console.warn('DATABASE_URL not set - database operations will fail');
-      // Create a mock function for development
-      this.sql = async () => ({ rows: [], rowCount: 0 });
+      console.warn('DATABASE_URL not set - database operations will return empty results');
+      // Create a mock function that returns empty results
+      this.sql = async (query: string, params?: any[]) => {
+        console.warn('Mock database query (no DATABASE_URL):', query.substring(0, 50) + '...');
+        return [];
+      };
     } else {
+      // Log database connection info (without exposing sensitive data)
+      console.log('Initializing Neon database client with URL:', 
+        databaseUrl.includes('neon.tech') ? 'Neon Cloud Database' : 'Local/Other Database'
+      );
       this.sql = neon(databaseUrl);
     }
   }

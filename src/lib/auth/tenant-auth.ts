@@ -219,6 +219,7 @@ export class TenantAuthService {
 
       // For development, create a mock authenticated tenant
       if (process.env.NODE_ENV === 'development' && (apiKey.startsWith('tenant_') || apiKey.startsWith('ghl_mcp_'))) {
+        console.log('Using development mock authentication')
         return {
           tenantId: 'dev-tenant-123',
           apiKey: apiKey,
@@ -229,10 +230,23 @@ export class TenantAuthService {
       // Use direct database client for authentication
       const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager')
       const db = neonDatabaseManager.getDatabase()
+      console.log('Executing database query for authentication...')
       const result = await db.executeSql(query, [apiKeyHash])
+      console.log('Database query result:', {
+        success: result?.success,
+        hasData: !!result?.data,
+        rowCount: result?.data?.rowCount || 0,
+        error: result?.error
+      })
       
       if (!result || !result.data?.rows || result.data.rows.length === 0) {
         console.log('No tenant found for API key hash:', apiKeyHash.substring(0, 8) + '...')
+        
+        // Debug: Check if any tenants exist
+        const debugQuery = `SELECT COUNT(*) as count FROM tenants`
+        const debugResult = await db.executeSql(debugQuery, [])
+        console.log('Total tenants in database:', debugResult?.data?.rows?.[0]?.count || 0)
+        
         return null
       }
 
