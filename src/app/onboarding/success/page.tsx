@@ -19,7 +19,12 @@ function OnboardingSuccessContent() {
       // Fetch installation details
       fetchInstallationDetails(installationId)
     }
-  }, [installationId])
+    // Store API key in localStorage if provided
+    if (apiKey) {
+      localStorage.setItem('tenant_api_key', apiKey)
+      console.log('API key stored in localStorage')
+    }
+  }, [installationId, apiKey])
 
   const fetchInstallationDetails = async (id: string) => {
     try {
@@ -51,7 +56,7 @@ function OnboardingSuccessContent() {
       try {
         const response = await fetch(test.endpoint, {
           headers: {
-            'X-Tenant-API-Key': localStorage.getItem('tenant_api_key') || ''
+            'X-Tenant-API-Key': apiKey || localStorage.getItem('tenant_api_key') || ''
           }
         })
         

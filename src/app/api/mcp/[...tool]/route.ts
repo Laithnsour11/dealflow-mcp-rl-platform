@@ -548,9 +548,22 @@ async function handleMCPRequest(
       )
     }
 
+    // Log request headers for debugging
+    console.log('MCP Request:', {
+      tool: toolName,
+      headers: {
+        'X-Tenant-API-Key': request.headers.get('X-Tenant-API-Key') ? '[present]' : '[missing]',
+        'Authorization': request.headers.get('Authorization') ? '[present]' : '[missing]'
+      }
+    })
+
     // Authenticate tenant
     const authResult = await tenantAuth.authenticateRequest(request)
     if (!authResult.success) {
+      console.error('Authentication failed:', {
+        error: authResult.error,
+        statusCode: authResult.statusCode
+      })
       return NextResponse.json(
         { 
           success: false, 

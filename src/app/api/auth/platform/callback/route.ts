@@ -219,22 +219,60 @@ async function updateTenantAuthMethod(tenantId: string, method: string, installa
     
     const subdomain = `tenant-${tenantId.slice(0, 8)}`;
     
-    // Upsert tenant
+    // Generate API key
+    const apiKey = tenantAuth.generateApiKey();
+    const apiKeyHash = tenantAuth.hashApiKey(apiKey);
+    
+    // Get OAuth installation to retrieve location ID
+    const installResult = await db.executeSql(
+      'SELECT location_id FROM oauth_installations WHERE id = $1',
+      [installationId]
+    );
+    
+    const locationId = installResult.data?.rows?.[0]?.location_id || '';
+    
+    // Upsert tenant with API key hash
     const tenantSql = `
       INSERT INTO tenants (
-        tenant_id, subdomain, auth_method, oauth_installation_id
-      ) VALUES ($1, $2, $3, $4)
+        tenant_id, subdomain, auth_method, oauth_installation_id,
+        api_key_hash, ghl_location_id, name, email, plan, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       ON CONFLICT (tenant_id) DO UPDATE SET
         auth_method = EXCLUDED.auth_method,
         oauth_installation_id = EXCLUDED.oauth_installation_id,
+        api_key_hash = EXCLUDED.api_key_hash,
+        ghl_location_id = EXCLUDED.ghl_location_id,
         updated_at = NOW()
       RETURNING *
     `;
     
-    await db.executeSql(tenantSql, [tenantId, subdomain, method, installationId]);
+    await db.executeSql(tenantSql, [
+      tenantId, 
+      subdomain, 
+      method, 
+      installationId,
+      apiKeyHash,
+      locationId,
+      subdomain, // name
+      `${subdomain}@dealflow.ai`, // email placeholder
+      'starter', // plan
+      'active' // status
+    ]);
     
-    // Generate API key
-    const apiKey = await tenantAuth.generateApiKey();
+    // Store API key in api_keys table
+    const apiKeySql = `
+      INSERT INTO api_keys (
+        tenant_id, key_hash, key_prefix, name, is_active
+      ) VALUES ($1, $2, $3, $4, $5)
+    `;
+    
+    await db.executeSql(apiKeySql, [
+      tenantId,
+      apiKeyHash,
+      'ghl_mcp_',
+      'OAuth Generated Key',
+      true
+    ]);
     
     return { success: true, apiKey };
   } catch (error) {

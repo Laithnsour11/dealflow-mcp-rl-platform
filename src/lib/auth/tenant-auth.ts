@@ -23,7 +23,7 @@ export class TenantAuthService {
   /**
    * Hash API key for secure storage
    */
-  private hashApiKey(apiKey: string): string {
+  hashApiKey(apiKey: string): string {
     const salt = process.env.API_KEY_SALT || 'default-salt-change-in-production'
     return crypto.createHash('sha256').update(apiKey + salt).digest('hex')
   }
@@ -59,6 +59,33 @@ export class TenantAuthService {
    */
   async decryptApiKey(encryptedKey: string): Promise<string> {
     return this.decrypt(encryptedKey)
+  }
+
+  /**
+   * Decrypt OAuth token (different format than regular encryption)
+   */
+  async decryptOAuthToken(encryptedToken: string): Promise<string> {
+    try {
+      const key = Buffer.from(process.env.ENCRYPTION_KEY!, 'base64')
+      const parts = encryptedToken.split(':')
+      if (parts.length !== 3) {
+        throw new Error('Invalid encrypted token format')
+      }
+      const [ivBase64, authTagBase64, encrypted] = parts
+      const iv = Buffer.from(ivBase64, 'base64')
+      const authTag = Buffer.from(authTagBase64, 'base64')
+      
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+      decipher.setAuthTag(authTag)
+      
+      let decrypted = decipher.update(encrypted, 'base64', 'utf8')
+      decrypted += decipher.final('utf8')
+      
+      return decrypted
+    } catch (error) {
+      console.error('Error decrypting OAuth token:', error)
+      throw error
+    }
   }
 
   /**
@@ -174,14 +201,18 @@ export class TenantAuthService {
   async authenticateTenant(apiKey: string): Promise<TenantAuth | null> {
     try {
       if (!apiKey || !apiKey.startsWith('ghl_mcp_')) {
+        console.log('Invalid API key format:', apiKey ? apiKey.substring(0, 12) + '...' : 'no key')
         return null
       }
 
       const apiKeyHash = this.hashApiKey(apiKey)
+      console.log('Authenticating with API key hash:', apiKeyHash.substring(0, 8) + '...')
       
       const query = `
-        SELECT id, name, plan, status, usage_quota, current_usage, 
-               ghl_api_key_encrypted, ghl_location_id
+        SELECT tenant_id as id, subdomain as name, plan, status, 
+               COALESCE(usage_limit, 1000) as usage_quota, 
+               COALESCE(current_usage, 0) as current_usage,
+               ghl_location_id, oauth_installation_id
         FROM tenants 
         WHERE api_key_hash = $1 AND status = 'active'
       `
@@ -195,13 +226,17 @@ export class TenantAuthService {
         }
       }
       
-      const result = await dbOperations.query(query, [apiKeyHash])
+      // Use direct database client for authentication
+      const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager')
+      const db = neonDatabaseManager.getDatabase()
+      const result = await db.executeSql(query, [apiKeyHash])
       
-      if (!result || result.length === 0) {
+      if (!result || !result.data?.rows || result.data.rows.length === 0) {
+        console.log('No tenant found for API key hash:', apiKeyHash.substring(0, 8) + '...')
         return null
       }
 
-      const tenant = result[0]
+      const tenant = result.data.rows[0]
 
       // Check usage quota
       if (tenant.current_usage >= tenant.usage_quota) {
@@ -235,9 +270,10 @@ export class TenantAuthService {
   } | null> {
     try {
       const query = `
-        SELECT id, name, ghl_api_key_encrypted, ghl_location_id, plan, status
+        SELECT tenant_id as id, subdomain as name, 
+               oauth_installation_id, ghl_location_id, plan, status
         FROM tenants 
-        WHERE id = $1 AND status = 'active'
+        WHERE tenant_id = $1 AND status = 'active'
       `
 
       // For development, return mock config
@@ -252,19 +288,36 @@ export class TenantAuthService {
         }
       }
       
-      const result = await dbOperations.query(query, [tenantId])
+      // Use direct database client
+      const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager')
+      const db = neonDatabaseManager.getDatabase()
+      const result = await db.executeSql(query, [tenantId])
       
-      if (!result || result.length === 0) {
+      if (!result || !result.data?.rows || result.data.rows.length === 0) {
         return null
       }
 
-      const tenant = result[0]
-      const decryptedGhlKey = this.decrypt(tenant.ghl_api_key_encrypted)
+      const tenant = result.data.rows[0]
+      
+      // For OAuth tenants, we need to get the access token from oauth_installations
+      let ghlApiKey = ''
+      if (tenant.oauth_installation_id) {
+        const oauthQuery = `
+          SELECT access_token FROM oauth_installations 
+          WHERE id = $1
+        `
+        const oauthResult = await db.executeSql(oauthQuery, [tenant.oauth_installation_id])
+        if (oauthResult?.data?.rows?.[0]) {
+          // Decrypt the OAuth access token
+          const encryptedToken = oauthResult.data.rows[0].access_token
+          ghlApiKey = await this.decryptOAuthToken(encryptedToken)
+        }
+      }
 
       return {
         id: tenant.id,
         name: tenant.name,
-        ghlApiKey: decryptedGhlKey,
+        ghlApiKey: ghlApiKey,
         ghlLocationId: tenant.ghl_location_id,
         plan: tenant.plan,
         status: tenant.status
