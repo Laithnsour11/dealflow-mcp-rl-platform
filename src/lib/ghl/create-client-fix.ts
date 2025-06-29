@@ -19,12 +19,18 @@ export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: stri
 
   // Add pipeline methods (for testing)
   (client as any).getPipelines = async function() {
-    return this.makeRequest(`/opportunities/v1/pipelines?locationId=${this.locationId}`);
+    return this.makeRequest(`/opportunities/pipelines?locationId=${this.locationId}`);
   };
 
   // Add calendar methods (for testing)
   (client as any).getCalendars = async function() {
-    return this.makeRequest(`/calendars/v1/?locationId=${this.locationId}`);
+    return this.makeRequest(`/calendars/?locationId=${this.locationId}`);
+  };
+
+  // Override searchContacts to use correct endpoint
+  (client as any).searchContacts = async function(params?: any) {
+    const queryString = params ? `?${new URLSearchParams(params)}` : '?';
+    return this.makeRequest(`/contacts/${queryString}locationId=${this.locationId}`);
   };
 
   return client;
