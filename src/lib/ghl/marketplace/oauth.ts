@@ -23,7 +23,7 @@ interface OAuthTokens {
 }
 
 export class GHLOAuth {
-  private config: OAuthConfig;
+  config: OAuthConfig; // Made public for debugging
   private baseUrl = 'https://services.leadconnectorhq.com';
   private marketplaceUrl = 'https://marketplace.leadconnectorhq.com';
 

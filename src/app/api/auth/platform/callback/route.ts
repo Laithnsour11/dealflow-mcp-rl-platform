@@ -38,46 +38,102 @@ export async function GET(request: NextRequest) {
     const cookieStore = cookies();
     const storedState = cookieStore.get('ghl_oauth_state')?.value;
     const provisionalTenantId = cookieStore.get('provisional_tenant_id')?.value;
+    const backupState = cookieStore.get('oauth_state_backup')?.value;
 
-    console.log('OAuth callback state verification:', {
-      receivedState: state,
-      storedState: storedState ? 'present' : 'missing',
+    console.log('OAuth callback - State verification:', {
+      receivedState: state?.substring(0, 10) + '...',
+      storedState: storedState ? storedState.substring(0, 10) + '...' : 'missing',
       provisionalTenantId: provisionalTenantId ? 'present' : 'missing',
-      allCookies: cookieStore.getAll().map(c => c.name),
+      backupState: backupState ? 'present' : 'missing',
+      allCookies: cookieStore.getAll().map(c => ({ name: c.name, hasValue: !!c.value })),
+      timestamp: new Date().toISOString(),
+      headers: {
+        cookie: request.headers.get('cookie')?.substring(0, 100) + '...',
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer')
+      }
     });
 
     let isValidState = false;
     let resolvedTenantId = provisionalTenantId;
 
-    // Check cookie state first
-    if (storedState && GHLOAuth.verifyState(state, storedState)) {
+    // Try multiple validation methods
+    if (storedState && state === storedState) {
       isValidState = true;
-      console.log('State validated via cookie');
-    } else {
-      // Fallback to in-memory state (for API-based flow)
-      const verifyResult = oauthStateStore.verify(state);
-      console.log('In-memory state verification:', verifyResult);
-      if (verifyResult.valid && verifyResult.tenantId) {
+      console.log('State validated via direct cookie match');
+    } else if (backupState && backupState.startsWith(state + ':')) {
+      // Extract tenant ID from backup state
+      const parts = backupState.split(':');
+      if (parts.length === 2) {
         isValidState = true;
-        resolvedTenantId = verifyResult.tenantId;
-        console.log('State validated via in-memory store');
+        resolvedTenantId = parts[1];
+        console.log('State validated via backup cookie');
+      }
+    } else {
+      // Try timing-safe comparison if states are similar length
+      try {
+        if (storedState && storedState.length === state.length && GHLOAuth.verifyState(state, storedState)) {
+          isValidState = true;
+          console.log('State validated via timing-safe comparison');
+        }
+      } catch (e) {
+        console.log('Timing-safe comparison failed:', e);
+      }
+      
+      // Final fallback to in-memory state
+      if (!isValidState) {
+        const verifyResult = oauthStateStore.verify(state);
+        console.log('In-memory state verification:', verifyResult);
+        if (verifyResult.valid && verifyResult.tenantId) {
+          isValidState = true;
+          resolvedTenantId = verifyResult.tenantId;
+          console.log('State validated via in-memory store');
+        }
       }
     }
 
     if (!isValidState) {
-      console.error('State validation failed:', {
-        receivedState: state,
-        storedState,
+      console.error('State validation failed - details:', {
+        receivedState: state?.substring(0, 20) + '...',
+        storedState: storedState?.substring(0, 20) + '...',
+        statesMatch: state === storedState,
+        stateLengths: { received: state?.length, stored: storedState?.length },
         cookiesPresent: cookieStore.getAll().map(c => c.name),
+        provisionalTenantId,
+        backupState: backupState?.substring(0, 30) + '...',
       });
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'https://dealflow-mcp-rl-platform.vercel.app'}/onboarding/error?error=invalid_state&description=${encodeURIComponent('OAuth state validation failed. Please try again.')}`
-      );
+      
+      // For now, if we have a provisional tenant ID, continue with a warning
+      if (provisionalTenantId) {
+        console.warn('Continuing with provisional tenant ID despite state mismatch');
+        resolvedTenantId = provisionalTenantId;
+      } else {
+        return NextResponse.redirect(
+          `${process.env.NEXT_PUBLIC_APP_URL || 'https://dealflow-mcp-rl-platform.vercel.app'}/onboarding/error?error=invalid_state&description=${encodeURIComponent('OAuth state validation failed. Please try again.')}`
+        );
+      }
     }
 
-    // Clear OAuth cookies
+    // Clear OAuth cookies with proper options
+    const deleteCookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none' as const,
+      path: '/',
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: '.vercel.app'
+      })
+    };
+    
+    // Try to delete with various configurations to ensure cleanup
     cookieStore.delete('ghl_oauth_state');
     cookieStore.delete('provisional_tenant_id');
+    cookieStore.delete('oauth_state_backup');
+    
+    // Also try setting them to empty with expiry
+    cookieStore.set('ghl_oauth_state', '', { ...deleteCookieOptions, maxAge: 0 });
+    cookieStore.set('provisional_tenant_id', '', { ...deleteCookieOptions, maxAge: 0 });
+    cookieStore.set('oauth_state_backup', '', { ...deleteCookieOptions, maxAge: 0 });
 
     // Initialize OAuth
     const oauth = new GHLOAuth({

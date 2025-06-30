@@ -316,18 +316,24 @@ export class TenantAuthService {
 
       const tenant = result.data.rows[0]
       
-      // For OAuth tenants, we need to get the access token from oauth_installations
+      // For OAuth tenants, get a valid (potentially refreshed) access token
       let ghlApiKey = ''
       if (tenant.oauth_installation_id) {
-        const oauthQuery = `
-          SELECT access_token FROM oauth_installations 
-          WHERE id = $1
-        `
-        const oauthResult = await db.executeSql(oauthQuery, [tenant.oauth_installation_id])
-        if (oauthResult?.data?.rows?.[0]) {
-          // Decrypt the OAuth access token
-          const encryptedToken = oauthResult.data.rows[0].access_token
-          ghlApiKey = await this.decryptOAuthToken(encryptedToken)
+        try {
+          const { oauthTokenManager } = await import('@/lib/ghl/oauth-token-manager')
+          ghlApiKey = await oauthTokenManager.getValidAccessToken(tenant.oauth_installation_id)
+        } catch (error) {
+          console.error('Failed to get valid OAuth token:', error)
+          // Fallback to direct query if token manager fails
+          const oauthQuery = `
+            SELECT access_token FROM oauth_installations 
+            WHERE id = $1
+          `
+          const oauthResult = await db.executeSql(oauthQuery, [tenant.oauth_installation_id])
+          if (oauthResult?.data?.rows?.[0]) {
+            const encryptedToken = oauthResult.data.rows[0].access_token
+            ghlApiKey = await this.decryptOAuthToken(encryptedToken)
+          }
         }
       }
 

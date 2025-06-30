@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { tenantAuth } from '@/lib/auth/tenant-auth'
 import { createTenantGHLClient } from '@/lib/ghl/tenant-client-v2'
 import { createTenantGHLClientFixed } from '@/lib/ghl/create-client-fix'
+import { handleAPIError } from '@/lib/middleware/error-handler'
 
 // Available MCP tools mapping - 269 total tools
 const MCP_TOOLS = {
@@ -585,6 +586,15 @@ async function handleMCPRequest(
       )
     }
 
+    // Log tenant config for debugging
+    console.log('Creating GHL client with config:', {
+      tenantId: tenantConfig.id,
+      locationId: tenantConfig.ghlLocationId,
+      hasApiKey: !!tenantConfig.ghlApiKey,
+      apiKeyLength: tenantConfig.ghlApiKey?.length,
+      apiKeyPrefix: tenantConfig.ghlApiKey?.substring(0, 20) + '...'
+    });
+
     // Create tenant-specific GHL client
     // tenantConfig already has the decrypted GHL API key
     const tenantData = {
@@ -656,7 +666,20 @@ async function handleMCPRequest(
     // Most methods now just take the full requestData object
     try {
       result = await clientMethod.call(ghlClient, requestData)
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`Error calling ${methodName}:`, {
+        error: error.message,
+        statusCode: error.statusCode,
+        response: error.response?.data,
+        tool: methodName,
+        tenantId: tenant?.tenantId
+      })
+      
+      // Check if it's an authentication error
+      if (error.message?.includes('401') || error.response?.status === 401) {
+        console.log('Authentication error detected, OAuth token may be expired');
+      }
+      
       // If the method fails, try with specific parameter extraction for backward compatibility
       const toolName = params.tool[0]
       
@@ -747,17 +770,7 @@ async function handleMCPRequest(
       }
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
-        metadata: {
-          timestamp: new Date().toISOString(),
-          responseTime: `${responseTime}ms`
-        }
-      },
-      { status: 500 }
-    )
+    return handleAPIError(error)
   }
 }
 

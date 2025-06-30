@@ -33,29 +33,38 @@ export async function GET(request: NextRequest) {
     // Also store in cookies for browser flow
     const cookieStore = cookies();
     
-    // Log cookie setting attempt
-    console.log('Setting OAuth cookies:', {
+    // Enhanced logging for debugging
+    console.log('OAuth start - Setting cookies:', {
       state: state.substring(0, 10) + '...',
       provisionalTenantId,
       nodeEnv: process.env.NODE_ENV,
       isProduction: process.env.NODE_ENV === 'production',
+      redirectUri: oauth.config.redirectUri,
+      cookieCount: cookieStore.getAll().length,
+      timestamp: new Date().toISOString()
     });
     
-    cookieStore.set('ghl_oauth_state', state, {
+    // Set cookies with proper domain and settings for cross-site OAuth
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', // Changed from 'lax' to 'none' for cross-site OAuth flow
+      secure: true, // Always use secure in production
+      sameSite: 'none' as const, // Required for cross-site OAuth
       maxAge: 60 * 10, // 10 minutes
       path: '/',
+      // Add domain to ensure cookies work across subdomains
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: '.vercel.app'
+      })
+    };
+    
+    cookieStore.set('ghl_oauth_state', state, cookieOptions);
+    cookieStore.set('provisional_tenant_id', provisionalTenantId, {
+      ...cookieOptions,
+      maxAge: 60 * 60, // 1 hour for tenant ID
     });
     
-    cookieStore.set('provisional_tenant_id', provisionalTenantId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', // Changed from 'lax' to 'none' for cross-site OAuth flow
-      maxAge: 60 * 60, // 1 hour
-      path: '/',
-    });
+    // Also store a backup state in the URL-safe format
+    cookieStore.set('oauth_state_backup', `${state}:${provisionalTenantId}`, cookieOptions);
 
     // Generate authorization URL
     const authUrl = oauth.getAuthorizationUrl(state, userType);
