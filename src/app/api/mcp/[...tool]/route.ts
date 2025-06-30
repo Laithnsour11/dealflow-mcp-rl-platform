@@ -977,14 +977,4 @@ function getToolCategory(toolName: string): string {
 
 function getToolParameters(toolName: string): Record<string, string> {
   // Define expected parameters for each tool
-  const parameters: Record<string, Record<string, string>> = {
-    'get_contact': { contactId: 'string (required)' },
-    'create_contact': { firstName: 'string', lastName: 'string', email: 'string', phone: 'string' },
-    'send_sms': { contactId: 'string (required)', message: 'string (required)' },
-    'send_email': { contactId: 'string (required)', subject: 'string (required)', body: 'string (required)' },
-    'search_contacts': { query: 'string', tags: 'array', limit: 'number' },
-    'get_conversation_transcripts': { contactId: 'string', startDate: 'string', endDate: 'string', includeTypes: 'array' }
-  }
-  
-  return parameters[toolName] || {}
-}
+  const parameters: Record<string, Record<string

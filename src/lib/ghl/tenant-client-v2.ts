@@ -255,32 +255,44 @@ export class TenantGHLClientV2 {
   // Messaging & Conversations (20 tools)
   // ============================================
   async searchConversations(params?: any) {
-    const queryString = params ? `?${new URLSearchParams(params)}` : '';
-    return this.makeRequest(`/conversations/v1/search${queryString}&locationId=${this.locationId}`);
+    const queryParams = {
+      ...params,
+      locationId: this.locationId
+    };
+    const queryString = new URLSearchParams(queryParams).toString();
+    return this.makeRequest(`/conversations/search?${queryString}`);
   }
 
   async getConversation(conversationId: string) {
-    return this.makeRequest(`/conversations/v1/${conversationId}`);
+    return this.makeRequest(`/conversations/${conversationId}`);
   }
 
   async createConversation(data: any) {
-    return this.makeRequest('/conversations/v1/', {
+    return this.makeRequest('/conversations', {
       method: 'POST',
       body: JSON.stringify({ ...data, locationId: this.locationId }),
     });
   }
 
   async sendSMS(data: any) {
-    return this.makeRequest('/conversations/v1/messages/sms', {
+    return this.makeRequest('/conversations/messages', {
       method: 'POST',
-      body: JSON.stringify({ ...data, locationId: this.locationId }),
+      body: JSON.stringify({ 
+        type: 'SMS',
+        ...data, 
+        locationId: this.locationId 
+      }),
     });
   }
 
   async sendEmail(data: any) {
-    return this.makeRequest('/conversations/v1/messages/email', {
+    return this.makeRequest('/conversations/messages', {
       method: 'POST',
-      body: JSON.stringify({ ...data, locationId: this.locationId }),
+      body: JSON.stringify({ 
+        type: 'Email',
+        ...data, 
+        locationId: this.locationId 
+      }),
     });
   }
 
@@ -620,7 +632,4 @@ export class TenantGHLClientV2 {
 export function createTenantGHLClient(tenant: Tenant, decryptedApiKey: string): TenantGHLClientV2 {
   return new TenantGHLClientV2({
     apiKey: decryptedApiKey,
-    locationId: tenant.ghl_location_id,
-    baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com'
-  });
-}
+    loca

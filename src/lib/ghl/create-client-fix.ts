@@ -5,6 +5,7 @@
 import { Tenant } from '@/types';
 import { TenantGHLClientV2 } from './tenant-client-v2';
 import { locationMethods } from './location-methods';
+import { conversationMethods } from './conversation-methods';
 
 // Extend the client with missing methods
 export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: string): any {
@@ -16,6 +17,9 @@ export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: stri
 
   // Add location methods
   Object.assign(client, locationMethods);
+  
+  // Add conversation methods with fixed endpoints
+  Object.assign(client, conversationMethods);
 
   // Add pipeline methods (for testing)
   (client as any).getPipelines = async function() {
@@ -29,9 +33,4 @@ export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: stri
 
   // Override searchContacts to use correct endpoint
   (client as any).searchContacts = async function(params?: any) {
-    const queryString = params ? `?${new URLSearchParams(params)}` : '?';
-    return this.makeRequest(`/contacts/${queryString}locationId=${this.locationId}`);
-  };
-
-  return client;
-}
+    const queryString 

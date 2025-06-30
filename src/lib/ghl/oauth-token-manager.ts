@@ -164,4 +164,4 @@ export class OAuthTokenManager {
   }
 }
 
-export const oauthTokenManager = OAuthTokenManager.getInstance();
+export const oauthTokenManager = OAuthTokenManager.getInsta
