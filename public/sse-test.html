@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Test - GoHighLevel MCP Platform</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .connect {
+            background: #4CAF50;
+            color: white;
+        }
+        .connect:hover {
+            background: #45a049;
+        }
+        .disconnect {
+            background: #f44336;
+            color: white;
+        }
+        .disconnect:hover {
+            background: #da190b;
+        }
+        .clear {
+            background: #2196F3;
+            color: white;
+        }
+        .clear:hover {
+            background: #0b7dda;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .status.connecting {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .events {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background: #f8f8f8;
+        }
+        .event {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: white;
+            border-left: 4px solid #ddd;
+        }
+        .event.connected {
+            border-left-color: #4CAF50;
+        }
+        .event.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .event.info {
+            border-left-color: #2196F3;
+        }
+        .event.authenticated {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        .event.complete {
+            border-left-color: #9c27b0;
+        }
+        .event-type {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .event-data {
+            color: #666;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .endpoint {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .endpoint h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .endpoint code {
+            background: #e8e8e8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SSE Test - GoHighLevel MCP Platform</h1>
+        <p class="subtitle">Test Server-Sent Events connectivity for AI platform integration</p>
+        
+        <div class="info">
+            <strong>Instructions:</strong> Enter your API key (optional) and click Connect to test SSE functionality.
+            This endpoint is perfect for testing with VAPI, ElevenLabs, or any AI platform that requires streaming.
+        </div>
+
+        <div class="controls">
+            <input type="text" id="apiKey" placeholder="API Key (optional): ghl_mcp_xxxxxxxxxxxxx">
+            <button class="connect" onclick="connect()">Connect</button>
+            <button class="disconnect" onclick="disconnect()" disabled>Disconnect</button>
+            <button class="clear" onclick="clearEvents()">Clear</button>
+        </div>
+
+        <div id="status" class="status disconnected">Disconnected</div>
+
+        <div class="events" id="events">
+            <div class="event info">
+                <div class="event-type">Ready</div>
+                <div class="event-data">Click "Connect" to start the SSE test...</div>
+            </div>
+        </div>
+
+        <div class="endpoints">
+            <div class="endpoint">
+                <h3>SSE Endpoint</h3>
+                <code>/api/sse/[tool_name]</code>
+                <p>For VAPI and SSE clients</p>
+            </div>
+            <div class="endpoint">
+                <h3>Stream Endpoint</h3>
+                <code>/api/stream/[tool_name]</code>
+                <p>For chunked HTTP streaming</p>
+            </div>
+            <div class="endpoint">
+                <h3>AI Endpoint</h3>
+                <code>/api/ai/[tool_name]</code>
+                <p>Auto-detects format</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        const eventsDiv = document.getElementById('events');
+        const statusDiv = document.getElementById('status');
+        const connectBtn = document.querySelector('.connect');
+        const disconnectBtn = document.querySelector('.disconnect');
+        const apiKeyInput = document.getElementById('apiKey');
+
+        function updateStatus(status, text) {
+            statusDiv.className = 'status ' + status;
+            statusDiv.textContent = text;
+        }
+
+        function addEvent(type, data) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event ' + type;
+            
+            const typeDiv = document.createElement('div');
+            typeDiv.className = 'event-type';
+            typeDiv.textContent = 'Event: ' + type;
+            
+            const dataDiv = document.createElement('div');
+            dataDiv.className = 'event-data';
+            dataDiv.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+            
+            eventDiv.appendChild(typeDiv);
+            eventDiv.appendChild(dataDiv);
+            eventsDiv.appendChild(eventDiv);
+            eventsDiv.scrollTop = eventsDiv.scrollHeight;
+        }
+
+        function connect() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            updateStatus('connecting', 'Connecting...');
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+
+            const apiKey = apiKeyInput.value.trim();
+            const url = '/api/sse';
+            
+            if (apiKey) {
+                // For browsers that support headers in EventSource
+                eventSource = new EventSource(url);
+                // Note: Standard EventSource doesn't support custom headers
+                // In production, use a polyfill or pass API key as query param
+                addEvent('info', 'Note: Standard EventSource API doesn\'t support custom headers. In production, use a polyfill or fetch-event-source library.');
+            } else {
+                eventSource = new EventSource(url);
+            }
+
+            eventSource.addEventListener('connected', (e) => {
+                updateStatus('connected', 'Connected');
+                addEvent('connected', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('info', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('authenticating', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('authenticated', (e) => {
+                addEvent('authenticated', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('auth_failed', (e) => {
+                addEvent('error', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('no_auth', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('example', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('test_chunk_1', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('test_chunk_2', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('test_chunk_3', (e) => {
+                addEvent('info', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('complete', (e) => {
+                addEvent('complete', JSON.parse(e.data));
+            });
+
+            eventSource.addEventListener('error', (e) => {
+                if (e.data) {
+                    addEvent('error', JSON.parse(e.data));
+                } else if (eventSource.readyState === EventSource.CLOSED) {
+                    updateStatus('disconnected', 'Connection closed');
+                    addEvent('error', 'Connection closed');
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                } else {
+                    addEvent('error', 'Connection error occurred');
+                }
+            });
+
+            eventSource.onerror = (error) => {
+                updateStatus('disconnected', 'Connection error');
+                addEvent('error', 'Connection error: ' + error.message || 'Unknown error');
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            };
+        }
+
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            updateStatus('disconnected', 'Disconnected');
+            addEvent('info', 'Disconnected by user');
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+        }
+
+        function clearEvents() {
+            eventsDiv.innerHTML = '<div class="event info"><div class="event-type">Cleared</div><div class="event-data">Event log cleared</div></div>';
+        }
+
+        // Test with cURL command example
+        console.log(`
+To test with cURL:
+curl -N "https://dealflow-mcp-rl-platform.vercel.app/api/sse"
+
+With API key:
+curl -N -H "X-Tenant-API-Key: YOUR_KEY" "https://dealflow-mcp-rl-platform.vercel.app/api/sse"
+        `);
+    </script>
+</body>
+</html>
