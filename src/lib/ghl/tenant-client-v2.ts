@@ -632,7 +632,4 @@ export class TenantGHLClientV2 {
 export function createTenantGHLClient(tenant: Tenant, decryptedApiKey: string): TenantGHLClientV2 {
   return new TenantGHLClientV2({
     apiKey: decryptedApiKey,
-    locationId: tenant.ghl_location_id,
-    baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com'
-  });
-}
+    loca

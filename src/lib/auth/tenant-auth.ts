@@ -527,12 +527,4 @@ export class TenantAuthService {
   /**
    * Create anonymized hash for RL system
    */
-  createAnonymizedHash(tenantId: string, data: string): string {
-    const salt = process.env.RL_ANONYMIZATION_SALT || 'rl-salt-change-in-production'
-    return crypto.createHash('sha256').update(tenantId + data + salt).digest('hex')
-  }
-}
-
-
-// Export singleton instance
-export const tenantAuth = TenantAuthService.getInstance()
+  

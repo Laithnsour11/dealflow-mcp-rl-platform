@@ -33,9 +33,4 @@ export function createTenantGHLClientFixed(tenant: Tenant, decryptedApiKey: stri
 
   // Override searchContacts to use correct endpoint
   (client as any).searchContacts = async function(params?: any) {
-    const queryString = params ? `?${new URLSearchParams(params)}` : '?';
-    return this.makeRequest(`/contacts/${queryString}locationId=${this.locationId}`);
-  };
-
-  return client;
-}
+    const queryString 
