@@ -87,7 +87,7 @@ export class OAuthTokenManager {
       
       // Encrypt new tokens
       const encryptedAccessToken = await this.encryptToken(tokens.access_token);
-      const encryptedRefreshToken = await this.encryptToken(tokens.refresh_token);
+      const encryptedNewRefreshToken = await this.encryptToken(tokens.refresh_token);
       
       // Update in database
       const { neonDatabaseManager } = await import('@/lib/db/neon-database-manager');
@@ -105,7 +105,7 @@ export class OAuthTokenManager {
       const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
       await db.executeSql(updateQuery, [
         encryptedAccessToken,
-        encryptedRefreshToken,
+        encryptedNewRefreshToken,
         expiresAt,
         installationId
       ]);
