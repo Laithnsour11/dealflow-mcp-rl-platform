@@ -1,18 +1,26 @@
-# GoHighLevel MCP + RL Platform v2.0
+# GoHighLevel MCP (Model Context Protocol) Platform
 
-🚀 **Enterprise-grade Multi-tenant GoHighLevel Integration Platform**
+A comprehensive multi-tenant platform that provides all 269 GoHighLevel API endpoints through a unified MCP interface, enabling AI models and applications to interact with GoHighLevel CRM seamlessly.
 
-✨ Features **ALL 269 MCP tools**, OAuth 2.0 marketplace app support, and 96.7% accuracy Reinforcement Learning for AI-powered sales optimization.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.0-blue.svg)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-repo/ghl-mcp-rl-platform)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Laithnsour11/dealflow-mcp-rl-platform)
 
-## 🎯 What's New in v2.0
+## 🚀 Features
 
-- ✅ **Complete MCP Coverage**: All 269 GoHighLevel tools implemented
-- ✅ **OAuth 2.0 Support**: Full marketplace app integration  
-- ✅ **Enhanced Security**: Token encryption, secure multi-tenancy
-- ✅ **Professional Onboarding**: Beautiful UI flow for easy setup
-- ✅ **Comprehensive Documentation**: API docs, LLM context, marketplace guide
+- **Complete API Coverage**: All 269 GoHighLevel endpoints implemented
+- **OAuth 2.0 Integration**: Secure marketplace app authentication
+- **Multi-Tenant Architecture**: Isolated data and API access per tenant
+- **Automatic Token Refresh**: Never worry about expired tokens
+- **Rate Limiting**: Built-in protection against API abuse
+- **Type Safety**: Full TypeScript support with type definitions
+- **Real-time Messaging**: Send SMS, Email, WhatsApp, and more
+- **CRM Operations**: Complete contact, opportunity, and pipeline management
+- **Calendar Integration**: Appointment scheduling and availability management
+- **Custom Fields**: Dynamic field management for contacts and locations
+- **Analytics**: Built-in usage tracking and reporting
 
 ## 🚀 Quick Start
 
@@ -91,89 +99,132 @@ curl -X POST https://your-app.vercel.app/api/admin/init-db \
    - Use existing Private Integration API keys
    - Manual configuration required
 
-### MCP Endpoints - All 269 Tools
+## 📚 Complete API Documentation
 
-**Base URL**: `POST /api/mcp/[tool_name]`  
-**Authentication**: `X-Tenant-API-Key: your_key`
+### Authentication
 
-#### Contact Management (31 tools)
-- `search_contacts`, `get_contact`, `create_contact`, `update_contact`, `delete_contact`
-- `upsert_contact`, `get_duplicate_contact`, `merge_contacts`
-- Tags: `add_contact_tags`, `remove_contact_tags`, `bulk_update_contact_tags`
-- Tasks: `get_contact_tasks`, `create_contact_task`, `update_contact_task`, `delete_contact_task`
-- Notes: `get_contact_notes`, `create_contact_note`, `update_contact_note`, `delete_contact_note`
-- And 12 more...
-
-#### Invoices & Billing (39 tools)
-- Templates: `create_invoice_template`, `list_invoice_templates`, `update_invoice_template`
-- Invoices: `create_invoice`, `send_invoice`, `void_invoice`, `record_invoice_payment`
-- Estimates: `create_estimate`, `send_estimate`, `create_invoice_from_estimate`
-- Schedules: `create_invoice_schedule`, `auto_payment_invoice_schedule`
-- And 27 more...
-
-#### Payments (20 tools)
-- Orders: `list_orders`, `get_order_by_id`, `create_order_fulfillment`
-- Subscriptions: `list_subscriptions`, `get_subscription_by_id`
-- Coupons: `create_coupon`, `update_coupon`, `delete_coupon`
-- And 14 more...
-
-#### Social Media (17 tools)
-- Posts: `create_social_post`, `update_social_post`, `bulk_delete_social_posts`
-- Accounts: `get_social_accounts`, `start_social_oauth`
-- Analytics: `get_social_tags`, `review_social_post`
-- And 11 more...
-
-[View complete documentation →](https://your-app.vercel.app/docs)
-
-### RL Analysis Endpoints
-
-- `POST /api/rl/analyze` - Full conversation analysis
-- `POST /api/rl/real-time` - Real-time guidance
-- `POST /api/rl/compare` - A/B testing
-- `GET /api/rl/health` - System health check
-
-#### Example: Analyze Conversation
+All requests require the `X-Tenant-API-Key` header:
 
 ```bash
-curl -X POST https://your-app.vercel.app/api/rl/analyze \
-  -H "X-Tenant-API-Key: your_tenant_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "conversation": [
-      {"speaker": "customer", "message": "I need to sell my house quickly"},
-      {"speaker": "sales_rep", "message": "I can help. What's your timeline?"}
-    ]
-  }'
+curl https://dealflow-mcp-rl-platform.vercel.app/api/mcp/search_contacts \
+  -H "X-Tenant-API-Key: ghl_mcp_xxxxxxxxxxxxx"
 ```
 
-## 🔧 Platform Features
+### Base URL
 
-### Core Capabilities
-- ✅ **All 269 GHL Tools**: Complete API coverage - contacts, invoices, payments, social media, etc.
-- ✅ **OAuth 2.0 Integration**: GoHighLevel marketplace app ready
-- ✅ **Multi-tenant Architecture**: Enterprise-grade isolation and security
-- ✅ **96.7% RL Accuracy**: Advanced AI conversation analysis
-- ✅ **Real-time Guidance**: Live sales coaching and optimization
+```
+https://dealflow-mcp-rl-platform.vercel.app/api/mcp
+```
 
-### Advanced Features
-- 🧠 **DISC Personality Detection**: Adaptive communication strategies
-- 🎯 **Motivation Analysis**: Detect foreclosure, divorce, inheritance situations
-- 📊 **A/B Testing**: Optimize conversation approaches with data
-- 💰 **Usage Tracking**: Built-in analytics, billing, and rate limiting
-- 🔒 **Token Encryption**: Secure storage of all credentials
-- 📱 **Webhook Support**: Real-time event processing
-- 🚀 **Auto-scaling**: Vercel edge functions for global performance
+### Available Endpoints (269 Total)
 
-## 🛡️ Enterprise Security
+#### Contact Management (31 endpoints)
+- `search_contacts` - Search and filter contacts
+- `get_contact` - Get contact details  
+- `create_contact` - Create new contact
+- `update_contact` - Update contact information
+- `delete_contact` - Delete a contact
+- `add_contact_tags` - Add tags to contact
+- `remove_contact_tags` - Remove tags from contact
+- `get_contact_notes` - Get contact notes
+- `create_contact_note` - Add note to contact
+- `get_contact_tasks` - Get contact tasks
+- `create_contact_task` - Create task for contact
+- [And 20 more...](./docs/API_REFERENCE.md#contacts-api)
 
-- 🔐 **OAuth 2.0**: Industry-standard authentication
-- 🔒 **AES-256 Encryption**: All tokens and credentials encrypted at rest
-- 🚦 **Rate Limiting**: Configurable per-tenant limits
-- 🎭 **Data Anonymization**: Privacy-preserving RL analysis
-- 🔑 **API Key Management**: Secure generation and rotation
-- 🛡️ **CORS Protection**: Configurable origin restrictions
-- 📊 **Audit Logging**: Complete API usage tracking
-- 🔄 **Token Rotation**: Automatic OAuth token refresh
+#### Conversations & Messaging (20 endpoints)
+- `search_conversations` - Search conversations
+- `get_conversation` - Get conversation details
+- `send_sms` - Send SMS message
+- `send_email` - Send email
+- `send_whatsapp` - Send WhatsApp message
+- `send_facebook_message` - Send Facebook message
+- `send_instagram_message` - Send Instagram message
+- [And 13 more...](./docs/API_REFERENCE.md#conversations-api)
+
+#### Calendar & Appointments (14 endpoints)
+- `get_calendars` - List calendars
+- `get_calendar_groups` - Get calendar groups
+- `get_free_slots` - Get available time slots
+- `create_appointment` - Book appointment
+- `update_appointment` - Modify appointment
+- `delete_appointment` - Cancel appointment
+- [And 8 more...](./docs/API_REFERENCE.md#calendar-api)
+
+#### Opportunities & Pipelines (10 endpoints)
+- `search_opportunities` - Search opportunities
+- `get_pipelines` - List pipelines
+- `create_opportunity` - Create opportunity
+- `update_opportunity` - Update opportunity
+- `update_opportunity_status` - Change status
+- [And 5 more...](./docs/API_REFERENCE.md#opportunities-api)
+
+[**View Complete API Reference →**](./docs/API_REFERENCE.md)
+
+### Quick Example
+
+```javascript
+// Search contacts
+const response = await fetch('https://dealflow-mcp-rl-platform.vercel.app/api/mcp/search_contacts', {
+  method: 'GET',
+  headers: {
+    'X-Tenant-API-Key': 'ghl_mcp_xxxxxxxxxxxxx'
+  }
+});
+
+// Send SMS
+const sms = await fetch('https://dealflow-mcp-rl-platform.vercel.app/api/mcp/send_sms', {
+  method: 'POST',
+  headers: {
+    'X-Tenant-API-Key': 'ghl_mcp_xxxxxxxxxxxxx',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    contactId: 'contact_123',
+    message: 'Hello from the API!'
+  })
+});
+```
+
+## 🏗️ Architecture
+
+### Tech Stack
+
+- **Frontend**: Next.js 14 (App Router)
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL (Neon)
+- **Authentication**: OAuth 2.0
+- **Deployment**: Vercel
+- **Language**: TypeScript
+
+### Project Structure
+
+```
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/          # OAuth endpoints
+│   │   │   ├── mcp/           # MCP API endpoints
+│   │   │   └── health/        # Health check
+│   │   └── onboarding/        # OAuth flow UI
+│   ├── lib/
+│   │   ├── auth/             # Authentication logic
+│   │   ├── db/               # Database clients
+│   │   ├── ghl/              # GoHighLevel API logic
+│   │   └── middleware/       # Express middleware
+│   └── types/                # TypeScript types
+├── docs/                     # Documentation
+└── tests/                    # Test files
+```
+
+### Security Features
+
+- **Encryption**: AES-256-GCM for sensitive data
+- **API Keys**: SHA-256 hashed with salt
+- **OAuth Tokens**: Encrypted at rest
+- **Rate Limiting**: Per-tenant limits (1000 req/15min)
+- **CORS**: Configured for production domains
+- **Audit Trail**: Complete API usage logging
 
 ## 📊 Monitoring & Analytics
 
@@ -195,65 +246,122 @@ curl https://your-app.vercel.app/api/rl/health
 ## 🚀 GoHighLevel Marketplace Setup
 
 1. **Create Marketplace App**
-   - Login to GoHighLevel → Settings → Apps
+   - Login to GoHighLevel → Marketplace → Developer
    - Create new OAuth 2.0 app
-   - Set redirect URI: `https://your-app.vercel.app/api/auth/ghl/callback`
-   - Select all 22 required scopes
+   - Set redirect URI: `https://your-app.vercel.app/api/auth/platform/callback`
+   - Select all required OAuth scopes
 
 2. **Configure OAuth**
    - Copy Client ID and Secret to environment variables
-   - Test OAuth flow at `/onboarding`
+   - Test OAuth flow at `/api/auth/platform/start`
 
-3. **Submit for Review**
-   - Complete app listing with screenshots
-   - Include comprehensive documentation
-   - Typical approval: 3-5 business days
+3. **Required OAuth Scopes**
+   - All contact management scopes
+   - All conversation scopes  
+   - All calendar scopes
+   - All opportunity scopes
+   - [View complete list](./docs/SETUP_GUIDE.md#required-oauth-scopes)
 
-[View complete marketplace guide →](/docs/MARKETPLACE-APP-CREATION-GUIDE.md)
-
-## 🏗️ Architecture
+### Data Flow
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   GoHighLevel   │────▶│  MCP Platform   │────▶│   RL System     │
-│   (269 Tools)   │◀────│  (Multi-tenant) │◀────│  (96.7% Acc.)   │
+│   Client App    │────▶│  MCP Platform   │────▶│  GoHighLevel    │
+│  (Your App)     │◀────│  (Multi-tenant) │◀────│  (269 APIs)     │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-         │                       │                        │
-         │                       ▼                        │
-         │              ┌─────────────────┐              │
-         └──────────────│   PostgreSQL    │──────────────┘
-                        │   (Neon DB)     │
-                        └─────────────────┘
+                               │
+                               ▼
+                      ┌─────────────────┐
+                      │   PostgreSQL    │
+                      │   (Neon DB)     │
+                      └─────────────────┘
 ```
 
-## 🤝 Support & Resources
+## 📖 Documentation
 
-### Documentation
-- [API Documentation](/docs)
-- [Marketplace Setup Guide](/docs/MARKETPLACE-APP-CREATION-GUIDE.md)
-- [LLM Integration Context](/docs/MCP-LLM-CONTEXT.md)
+- **[API Reference](./docs/API_REFERENCE.md)** - Complete endpoint documentation
+- **[Setup Guide](./docs/SETUP_GUIDE.md)** - Detailed setup instructions
+- **[Troubleshooting](./docs/SETUP_GUIDE.md#troubleshooting)** - Common issues and solutions
 
-### Troubleshooting
-- Check deployment logs in Vercel dashboard
-- Verify all environment variables are set
-- Test OAuth flow with a test sub-account
-- Use health endpoints to verify connectivity
+## 🤝 Support
 
-### Community
-- GitHub Issues: [Report bugs](https://github.com/your-repo/issues)
-- Developer Slack: [Join GHL developers](https://www.gohighlevel.com/dev-slack)
+- **GitHub Issues**: [Report bugs](https://github.com/Laithnsour11/dealflow-mcp-rl-platform/issues)
+- **Discussions**: [Ask questions](https://github.com/Laithnsour11/dealflow-mcp-rl-platform/discussions)
+- **API Status**: Check `/api/health` endpoint
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run tests
+npm test
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Fork repository
+2. Import to Vercel
+3. Add environment variables
+4. Deploy
+
+```bash
+vercel --prod
+```
+
+### Docker
+
+```bash
+docker build -t ghl-mcp-platform .
+docker run -p 3000:3000 --env-file .env ghl-mcp-platform
+```
 
 ## 📈 Performance
 
-- **Response Time**: <100ms average
+- **Response Time**: <200ms average
 - **Uptime**: 99.9% SLA
-- **Scale**: Handles 1000+ requests/second
-- **Global**: Edge deployment in 20+ regions
+- **Rate Limits**: 1000 requests/15 minutes per tenant
+- **Global**: Edge deployment via Vercel
 
-## 📝 License
+## 🤝 Contributing
 
-Proprietary - All rights reserved
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- GoHighLevel for their comprehensive API
+- Vercel for hosting and deployment
+- Neon for serverless PostgreSQL
+- All contributors and users
 
 ---
 
-Built with ❤️ for the GoHighLevel community
+Built with ❤️ by the Dealflow team
