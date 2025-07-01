@@ -66,4 +66,15 @@ export async function GET(request: NextRequest) {
     // Also store a backup state in the URL-safe format
     cookieStore.set('oauth_state_backup', `${state}:${provisionalTenantId}`, cookieOptions);
 
-    // Generate au
+    // Generate authorization URL
+    const authUrl = oauth.getAuthorizationUrl(state, userType);
+
+    // Redirect to GoHighLevel
+    return NextResponse.redirect(authUrl);
+  } catch (error: any) {
+    console.error('Failed to start OAuth flow:', error);
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/error?error=oauth_start_failed&description=${encodeURIComponent(error.message)}`
+    );
+  }
+}

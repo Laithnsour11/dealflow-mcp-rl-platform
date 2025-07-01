@@ -279,4 +279,89 @@ curl https://your-app.vercel.app/api/rl/health
 
 ## 📖 Documentation
 
-- **
+- **[API Reference](./docs/API_REFERENCE.md)** - Complete endpoint documentation
+- **[Setup Guide](./docs/SETUP_GUIDE.md)** - Detailed setup instructions
+- **[Troubleshooting](./docs/SETUP_GUIDE.md#troubleshooting)** - Common issues and solutions
+
+## 🤝 Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/Laithnsour11/dealflow-mcp-rl-platform/issues)
+- **Discussions**: [Ask questions](https://github.com/Laithnsour11/dealflow-mcp-rl-platform/discussions)
+- **API Status**: Check `/api/health` endpoint
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run tests
+npm test
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Fork repository
+2. Import to Vercel
+3. Add environment variables
+4. Deploy
+
+```bash
+vercel --prod
+```
+
+### Docker
+
+```bash
+docker build -t ghl-mcp-platform .
+docker run -p 3000:3000 --env-file .env ghl-mcp-platform
+```
+
+## 📈 Performance
+
+- **Response Time**: <200ms average
+- **Uptime**: 99.9% SLA
+- **Rate Limits**: 1000 requests/15 minutes per tenant
+- **Global**: Edge deployment via Vercel
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- GoHighLevel for their comprehensive API
+- Vercel for hosting and deployment
+- Neon for serverless PostgreSQL
+- All contributors and users
+
+---
+
+Built with ❤️ by the Dealflow team

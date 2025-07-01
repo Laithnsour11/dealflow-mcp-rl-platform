@@ -444,4 +444,6 @@ export class OAuthService {
 
   private async deleteInstallation(installationId: string): Promise<void> {
     // TODO: Delete from database
-    throw new Error('Not
+    throw new Error('Not implemented');
+  }
+}
